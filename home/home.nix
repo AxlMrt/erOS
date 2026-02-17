@@ -29,11 +29,17 @@
 	# Browser
 	"$mod, F, exec, firefox"
 	
-	"$mod, RETURN, exec, kitty"
+	# Terminal
+	"$mod, T, exec, kitty"
+
 	"$mod, D, exec, wofi --show drun"
 	"$mod, Q, killactive"
 	"$mod, E, exit"
       ];
     };
   };
+
+  imports = [
+    ./zsh/zsh.nix
+  ];
 }
