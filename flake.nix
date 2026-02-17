@@ -32,6 +32,7 @@
 	
 	# Pentesting
 	./modules/security/base-tools.nix
+	./modules/security/exploit.nix
 	./modules/security/recon.nix
 	./modules/security/web.nix
 
