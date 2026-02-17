@@ -21,8 +21,19 @@
 
       modules = [
 	./hosts/default/configuration.nix
+
+	# Core configuration
 	./modules/core/system.nix
+	./modules/core/networking.nix
+
+	# Desktop
+	./modules/desktop/apps.nix
 	./modules/desktop/hyprland.nix
+	
+	# Pentesting
+	./modules/security/base-tools.nix
+	./modules/security/recon.nix
+	./modules/security/web.nix
 
 	home-manager.nixosModules.home-manager
 	{

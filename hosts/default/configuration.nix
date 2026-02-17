@@ -3,11 +3,6 @@
 {
   imports = [
     ./hardware-configuration.nix
-    ../../modules/core/system.nix
-    ../../modules/desktop/hyprland.nix
-    ../../modules/security/base-tools.nix
-    ../../modules/security/recon.nix
-    ../../modules/security/web.nix
   ];
 
   networking.hostName = "axlmrt-laptop";
