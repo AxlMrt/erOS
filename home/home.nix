@@ -40,7 +40,9 @@
   };
 
   imports = [
+    ./emoji.nix
     ./zsh/zsh.nix
     ./terminal/kitty.nix
+    ./waybar/waybar-catpuccin.nix
   ];
 }
