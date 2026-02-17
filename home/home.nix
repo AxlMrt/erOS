@@ -41,5 +41,6 @@
 
   imports = [
     ./zsh/zsh.nix
+    ./terminal/kitty.nix
   ];
 }
