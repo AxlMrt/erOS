@@ -26,6 +26,9 @@
       };
 
       bind = [
+	# Browser
+	"$mod, F, exec, firefox"
+	
 	"$mod, RETURN, exec, kitty"
 	"$mod, D, exec, wofi --show drun"
 	"$mod, Q, killactive"
