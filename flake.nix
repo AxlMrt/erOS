@@ -23,6 +23,7 @@
 	./hosts/default/configuration.nix
 
 	# Core configuration
+	./modules/core/fonts.nix
 	./modules/core/system.nix
 	./modules/core/networking.nix
 
