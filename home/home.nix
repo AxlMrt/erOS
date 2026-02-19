@@ -1,6 +1,8 @@
-{ config, pkgs, ... }:
-
 {
+  config,
+  pkgs,
+  ...
+}: {
   home.username = "axlmrt";
   home.homeDirectory = "/home/axlmrt";
 
@@ -16,25 +18,25 @@
       "$mod" = "SUPER";
 
       exec-once = [
-	"waybar"
+        "waybar"
       ];
 
       monitor = ",preferred,auto,1";
 
       input = {
-	kb_layout = "fr";
+        kb_layout = "fr";
       };
 
       bind = [
-	# Browser
-	"$mod, F, exec, firefox"
-	
-	# Terminal
-	"$mod, T, exec, kitty"
+        # Browser
+        "$mod, F, exec, firefox"
 
-	"$mod, D, exec, wofi --show drun"
-	"$mod, Q, killactive"
-	"$mod, E, exit"
+        # Terminal
+        "$mod, T, exec, kitty"
+
+        "$mod, D, exec, wofi --show drun"
+        "$mod, Q, killactive"
+        "$mod, E, exit"
       ];
     };
   };
@@ -43,6 +45,7 @@
     ./emoji.nix
     ./zsh/zsh.nix
     ./terminal/kitty.nix
+    ./editors/vscode.nix
     ./waybar/waybar-catpuccin.nix
   ];
 }

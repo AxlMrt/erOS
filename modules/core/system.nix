@@ -1,6 +1,8 @@
-{ config, pkgs, ...}:
-
 {
+  config,
+  pkgs,
+  ...
+}: {
   imports = [];
 
   boot.loader.grub.enable = true;

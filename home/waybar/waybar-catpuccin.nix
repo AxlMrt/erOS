@@ -125,7 +125,6 @@ in {
           "custom/separator#line"
           "tray"
           "custom/separator#line"
-
         ];
         modules-center = [
           "custom/separator#line"
@@ -391,7 +390,6 @@ in {
           "on-scroll-down" = "$HOME/.config/hypr/scripts/Volume.sh --mic-dec";
           "tooltip-format" = "{source_desc} | {source_volume}%";
           "scroll-step" = 5;
-
         };
         tray = {
           "icon-size" = 20;

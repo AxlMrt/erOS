@@ -1,6 +1,8 @@
-{ config, pkgs, ...}:
-
 {
+  config,
+  pkgs,
+  ...
+}: {
   imports = [
     ./hardware-configuration.nix
   ];
@@ -15,7 +17,7 @@
 
   users.users.axlmrt = {
     isNormalUser = true;
-    extraGroups = [ "wheel" "networkmanager" "libvirtd" ];
+    extraGroups = ["wheel" "networkmanager" "libvirtd"];
     shell = pkgs.zsh;
   };
 

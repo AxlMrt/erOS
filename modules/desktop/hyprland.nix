@@ -1,6 +1,8 @@
-{ config, pkgs, ... }:
-
 {
+  config,
+  pkgs,
+  ...
+}: {
   programs.hyprland.enable = true;
 
   services.greetd = {
@@ -19,7 +21,7 @@
   hardware.opengl.enable = true;
 
   xdg.portal.enable = true;
-  xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
+  xdg.portal.extraPortals = [pkgs.xdg-desktop-portal-gtk];
 
   environment.systemPackages = with pkgs; [
     grim
