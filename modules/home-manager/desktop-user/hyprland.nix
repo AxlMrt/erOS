@@ -6,6 +6,7 @@
       "$mod" = "SUPER";
 
       exec-once = [
+        "qs-wallpapers-apply"
         "waybar"
       ];
 
@@ -18,7 +19,7 @@
       bind = [
         "$mod, F, exec, firefox"
         "$mod, T, exec, kitty"
-        "$mod, D, exec, wofi --show drun"
+        "$mod, D, exec, rofi -show drun"
         "$mod, Q, killactive"
         "$mod, E, exit"
       ];

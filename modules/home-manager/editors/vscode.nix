@@ -1,6 +1,7 @@
 {
   pkgs,
   lib,
+  config,
   ...
 }: let
   inherit (pkgs.lib) attrByPath;
@@ -81,8 +82,8 @@ in {
           ++ glassItExts
           ++ codeRunnerExts;
         userSettings = lib.mkForce {
-          "workbench.colorTheme" = "Catppuccin Macchiato";
-          "workbench.iconTheme" = "catppuccin-macchiato";
+          "workbench.colorTheme" = config.eros.theme.active.vscodeTheme;
+          "workbench.iconTheme" = config.eros.theme.active.vscodeIconTheme;
           "editor.formatOnSave" = true;
         };
       };

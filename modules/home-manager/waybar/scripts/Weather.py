@@ -53,6 +53,14 @@ TOOLTIP_MARKUP = os.getenv("WEATHER_TOOLTIP_MARKUP", "1").lower() not in ("0", "
 # Optional debug logging to stderr (set WEATHER_DEBUG=1 to enable)
 DEBUG = os.getenv("WEATHER_DEBUG", "0").lower() not in ("0", "false", "no")
 
+TEMP_COLOR_DEFAULT = os.getenv("WEATHER_TEMP_COLOR_DEFAULT", "#cdd6f4")
+TEMP_COLOR_FREEZE = os.getenv("WEATHER_TEMP_COLOR_FREEZE", "#89dceb")
+TEMP_COLOR_COLD = os.getenv("WEATHER_TEMP_COLOR_COLD", "#74c7ec")
+TEMP_COLOR_COOL = os.getenv("WEATHER_TEMP_COLOR_COOL", "#a6e3a1")
+TEMP_COLOR_WARM = os.getenv("WEATHER_TEMP_COLOR_WARM", "#f9e2af")
+TEMP_COLOR_HOT = os.getenv("WEATHER_TEMP_COLOR_HOT", "#fab387")
+TEMP_COLOR_VERY_HOT = os.getenv("WEATHER_TEMP_COLOR_VERY_HOT", "#f38ba8")
+
 # HTTP settings
 UA = (
     "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
@@ -219,33 +227,33 @@ def log_debug(msg: str) -> None:
 def temp_color(temp_val: Optional[float]) -> str:
     """Choose a color for the temperature number based on value and unit set."""
     if not isinstance(temp_val, (int, float)):
-        return "#cdd6f4"  # default text
+        return TEMP_COLOR_DEFAULT
     # Work in Fahrenheit for thresholds if imperial, else Celsius
     t = float(temp_val)
     if UNITS == "metric":
         if t <= -5:
-            return "#89dceb"  # sky
+            return TEMP_COLOR_FREEZE
         if t <= 5:
-            return "#74c7ec"  # sapphire
+            return TEMP_COLOR_COLD
         if t <= 15:
-            return "#a6e3a1"  # green
+            return TEMP_COLOR_COOL
         if t <= 25:
-            return "#f9e2af"  # yellow
+            return TEMP_COLOR_WARM
         if t <= 32:
-            return "#fab387"  # peach
-        return "#f38ba8"      # red
+            return TEMP_COLOR_HOT
+        return TEMP_COLOR_VERY_HOT
     else:
         if t <= 25:
-            return "#89dceb"
+            return TEMP_COLOR_FREEZE
         if t <= 41:
-            return "#74c7ec"
+            return TEMP_COLOR_COLD
         if t <= 60:
-            return "#a6e3a1"
+            return TEMP_COLOR_COOL
         if t <= 77:
-            return "#f9e2af"
+            return TEMP_COLOR_WARM
         if t <= 90:
-            return "#fab387"
-        return "#f38ba8"
+            return TEMP_COLOR_HOT
+        return TEMP_COLOR_VERY_HOT
 
 def ensure_cache_dir() -> None:
     try:

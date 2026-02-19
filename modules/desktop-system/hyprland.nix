@@ -26,9 +26,10 @@
   environment.systemPackages = with pkgs; [
     grim
     kitty
+    rofi
+    swww
     slurp
     waybar
     wl-clipboard
-    wofi
   ];
 }

@@ -5,7 +5,9 @@
   ...
 }: {
   networking.hostName = hostname;
-
+  networking.hosts = {
+    "10.129.2.105" = ["wingdata.htb"];
+  };
   nixpkgs.config.allowUnfree = true;
 
   time.timeZone = "Europe/Paris";

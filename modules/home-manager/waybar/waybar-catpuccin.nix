@@ -1,4 +1,8 @@
-{pkgs, ...}: let
+{
+  pkgs,
+  config,
+  ...
+}: let
   # Install helper scripts from modules/home-manager/waybar/scripts into ~/.config/waybar/scripts
   scriptsDir = ./scripts;
   scripts = builtins.attrNames (builtins.readDir scriptsDir);
@@ -54,36 +58,7 @@
     # Stream cava output and transform
     exec cava -p "$config_file" | sed -u "$dict"
   '';
-  # Catppuccin Mocha palette so CSS can be self-contained (no @import needed)
-  catppuccinColors = {
-    rosewater = "#f5e0dc";
-
-    flamingo = "#f2cdcd";
-    pink = "#f5c2e7";
-    mauve = "#cba6f7";
-    red = "#f38ba8";
-    maroon = "#eba0ac";
-    peach = "#fab387";
-    yellow = "#f9e2af";
-    green = "#a6e3a1";
-    teal = "#94e2d5";
-    sky = "#89dceb";
-    sapphire = "#74c7ec";
-    blue = "#89b4fa";
-    lavender = "#b4befe";
-    text = "#cdd6f4";
-    subtext1 = "#bac2de";
-    subtext0 = "#a6adc8";
-    overlay2 = "#9399b2";
-    overlay1 = "#7f849c";
-    overlay0 = "#6c7086";
-    surface2 = "#585b70";
-    surface1 = "#45475a";
-    surface0 = "#313244";
-    base = "#1e1e2e";
-    mantle = "#181825";
-    crust = "#11111b";
-  };
+  c = config.eros.theme.active.palette;
 in {
   # Ensure bundled Waybar scripts are installed under ~/.config/waybar/scripts
   home.file = builtins.listToAttrs (
@@ -217,11 +192,11 @@ in {
             "weeks-pos" = "right";
             "on-scroll" = 1;
             format = {
-              months = "<span color='#ffead3'><b>{}</b></span>";
-              days = "<span color='#ecc6d9'><b>{}</b></span>";
-              weeks = "<span color='#99ffdd'><b>W{:%V}</b></span>";
-              weekdays = "<span color='#ffcc66'><b>{}</b></span>";
-              today = "<span color='#ff6699'><b><u>{}</u></b></span>";
+              months = "<span color='${c.peach}'><b>{}</b></span>";
+              days = "<span color='${c.pink}'><b>{}</b></span>";
+              weeks = "<span color='${c.teal}'><b>W{:%V}</b></span>";
+              weekdays = "<span color='${c.yellow}'><b>{}</b></span>";
+              today = "<span color='${c.red}'><b><u>{}</u></b></span>";
             };
           };
           actions = {
@@ -575,7 +550,7 @@ in {
         # ---------- Custom modules (from ModulesCustom) ----------
         "custom/weather" = {
           return-type = "json";
-          exec = "sh -lc 'WEATHER_ICON_STYLE=emoji WEATHER_TOOLTIP_MARKUP=1 ~/.local/bin/weather'";
+          exec = "sh -lc 'WEATHER_ICON_STYLE=emoji WEATHER_TOOLTIP_MARKUP=1 WEATHER_TEMP_COLOR_FREEZE=${c.sky} WEATHER_TEMP_COLOR_COLD=${c.sapphire} WEATHER_TEMP_COLOR_COOL=${c.green} WEATHER_TEMP_COLOR_WARM=${c.yellow} WEATHER_TEMP_COLOR_HOT=${c.peach} WEATHER_TEMP_COLOR_VERY_HOT=${c.red} WEATHER_TEMP_COLOR_DEFAULT=${c.text} ~/.local/bin/weather'";
           interval = 600;
           tooltip = true;
         };
@@ -614,14 +589,13 @@ in {
           tooltip = true;
           "tooltip-format" = "App menu";
           format = "";
-          # on-click = "rofi -show drun";
-          on-click = "launch-nwg-menu";
-          "on-click-right" = "nwg-drawer -mr 225 -ml 225 -mt 200 -mb 200 -is 48 --spacing 15";
+          on-click = "rofi -show drun";
+          "on-click-right" = "rofi -show run";
         };
         # Integrated CAVA visualizer using the inline script above
         "custom/cava_mviz" = {
           exec = "${waybarCava}/bin/WaybarCava";
-          format = "<span color='#a6e3a1'>[</span> {} <span color='#a6e3a1'>]</span>";
+          format = "<span color='${c.green}'>[</span> {} <span color='${c.green}'>]</span>";
         };
         "custom/playerctl" = {
           format = "<span>{}</span>";
@@ -710,10 +684,7 @@ in {
         };
       }
     ];
-    # Consolidated style (Catppuccin Mocha) inlined
-    style = let
-      c = catppuccinColors;
-    in ''
+    style = ''
       @define-color rosewater ${c.rosewater};
       @define-color flamingo  ${c.flamingo};
       @define-color pink      ${c.pink};
@@ -780,7 +751,7 @@ in {
         border-radius: 15px;
       }
       #workspaces button.urgent {
-        color: #11111b;
+        color: @crust;
         background: transparent;
         border-radius: 15px;
       }
@@ -860,10 +831,10 @@ in {
       #idle_inhibitor.deactivated { color: @red; }
       #mpris { color: @rosewater; }
       #battery { color: @green; padding-left: 15px; border-radius: 15px 0 0 15px; }
-      @keyframes blink { to { background-color: #ffffff; color: #333333; } }
+      @keyframes blink { to { background-color: @text; color: @base; } }
 
       #battery.critical:not(.charging) {
-        color: #f53c3c;
+        color: @red;
         animation-name: blink;
         animation-duration: 0.5s;
         animation-timing-function: linear;
@@ -874,7 +845,7 @@ in {
       #network { background-color: transparent; color: @mauve; }
       #backlight { color: @flamingo; }
       #custom-weather { color: @green; border-radius: 15px; background-color: transparent; }
-      #custom-menu { color: #89b4fa; }
+      #custom-menu { color: @blue; }
       #pulseaudio { background-color: transparent; color: @blue; }
       #clock, #clock-calender { color: @green; }
       /* Use the same pale blue as clock for these icons */
@@ -898,7 +869,7 @@ in {
       /* Group drawer button color */
       #group-mobo_drawer { color: @green; }
       #backlight-slider slider, #pulseaudio-slider slider {
-        min-height: 7px; min-width: 15px; opacity: 0; background-color: @text; border-radius: 3px; box-shadow: 1px 5px 6px 1px #272727;
+        min-height: 7px; min-width: 15px; opacity: 0; background-color: @text; border-radius: 3px; box-shadow: 1px 5px 6px 1px @mantle;
       }
       #backlight-slider trough, #pulseaudio-slider trough {
         min-height: 100px; min-width: 7px; border-radius: 5px; background-color: @surface0;

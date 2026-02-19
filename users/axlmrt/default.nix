@@ -5,6 +5,8 @@
 
   home.stateVersion = "25.11";
 
+  eros.theme.variant = "mocha";
+
   # User-level app enablement.
   programs.git.enable = true;
 

@@ -39,7 +39,7 @@ Hyprland keybindings currently configured:
 
 - `SUPER + F` → launch Firefox
 - `SUPER + T` → launch Kitty
-- `SUPER + D` → open app launcher (`wofi --show drun`)
+- `SUPER + D` → open app launcher (`rofi -show drun`)
 - `SUPER + Q` → close active window
 - `SUPER + E` → exit Hyprland session
 
