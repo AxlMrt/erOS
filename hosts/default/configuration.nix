@@ -1,13 +1,10 @@
 {
-  config,
   pkgs,
+  hostname,
+  username,
   ...
 }: {
-  imports = [
-    ./hardware-configuration.nix
-  ];
-
-  networking.hostName = "axlmrt-laptop";
+  networking.hostName = hostname;
 
   nixpkgs.config.allowUnfree = true;
 
@@ -15,7 +12,7 @@
 
   i18n.defaultLocale = "fr_FR.UTF-8";
 
-  users.users.axlmrt = {
+  users.users.${username} = {
     isNormalUser = true;
     extraGroups = ["wheel" "networkmanager" "libvirtd"];
     shell = pkgs.zsh;

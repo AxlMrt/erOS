@@ -81,7 +81,7 @@ in {
           ++ glassItExts
           ++ codeRunnerExts;
         userSettings = lib.mkForce {
-          "workbench.colorTheme" = "Catpuccin Macchiato";
+          "workbench.colorTheme" = "Catppuccin Macchiato";
           "workbench.iconTheme" = "catppuccin-macchiato";
           "editor.formatOnSave" = true;
         };

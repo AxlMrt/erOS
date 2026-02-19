@@ -1,6 +1,6 @@
 {
-  config,
   pkgs,
+  username,
   ...
 }: {
   programs.hyprland.enable = true;
@@ -9,7 +9,7 @@
     enable = true;
     settings.default_session = {
       command = "${pkgs.hyprland}/bin/start-hyprland";
-      user = "axlmrt";
+      user = username;
     };
   };
 
@@ -18,7 +18,7 @@
     pulse.enable = true;
   };
 
-  hardware.opengl.enable = true;
+  hardware.graphics.enable = true;
 
   xdg.portal.enable = true;
   xdg.portal.extraPortals = [pkgs.xdg-desktop-portal-gtk];

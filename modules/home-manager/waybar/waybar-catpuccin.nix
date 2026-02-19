@@ -1,5 +1,5 @@
 {pkgs, ...}: let
-  # Install any helper scripts shipped in modules/home/waybar/scripts into ~/.config/waybar/scripts
+  # Install helper scripts from modules/home-manager/waybar/scripts into ~/.config/waybar/scripts
   scriptsDir = ./scripts;
   scripts = builtins.attrNames (builtins.readDir scriptsDir);
   # Inline, improved Cava script packaged via Nix so we don't rely on an external bash file

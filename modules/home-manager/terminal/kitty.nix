@@ -30,14 +30,6 @@
       open_url_with_default = true;
       detect_urls = true;
       allow_remote_control = true;
-    };
-
-    shellIntegration.enableZshIntegration = true;
-    shellIntegration.enableFishIntegration = true;
-    shellIntegration.enableBashIntegration = true;
-    shellIntegration.mode = "enabled";
-
-    settings = {
       background_opacity = 0.85;
       dynamic_background_opacity = true;
       blur = true;
@@ -45,6 +37,11 @@
 
       linux_display_server = "wayland";
     };
+
+    shellIntegration.enableZshIntegration = true;
+    shellIntegration.enableFishIntegration = true;
+    shellIntegration.enableBashIntegration = true;
+    shellIntegration.mode = "enabled";
 
     extraConfig = ''
 

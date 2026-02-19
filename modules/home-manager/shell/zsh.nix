@@ -1,5 +1,4 @@
 {
-  profile,
   pkgs,
   lib,
   ...

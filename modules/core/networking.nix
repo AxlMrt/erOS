@@ -3,7 +3,7 @@
   pkgs,
   ...
 }: {
-  networking.networkmanager.enable = true;
+  # NetworkManager is enabled in modules/core/system.nix.
   networking.firewall.enable = true;
 
   environment.systemPackages = with pkgs; [
