@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
 
+theme_env="$HOME/.config/eros/active/theme/colors.env"
+if [ -f "$theme_env" ]; then
+  # shellcheck disable=SC1090
+  . "$theme_env"
+fi
+
+warn_color="${EROS_COLOR_WARN:-#ebcb8b}"
+
 # Original script by Eric Murphy
 # https://github.com/ericmurphyxyz/dotfiles/blob/master/.local/bin/battery-alert
 #
@@ -41,7 +49,7 @@ if [ "$BATTERY_LEVEL" -eq 100 ] && [ "$BATTERY_STATE" == "fully-charged" ] && [ 
 
 # if the battery is low and is discharging
 elif [ "$BATTERY_LEVEL" -le $WARNING_LEVEL ] && [ "$BATTERY_STATE" == "discharging" ] && [ ! -f $FILE_WARNING ]; then
-  notify-send -a "state" "Battery Low (${BATTERY_LEVEL}%)" "You might want to plug in your PC." -u critical -i "battery-caution" -r 9991 -h string:fgcolor:\#fab387 -h string:frcolor:\#fab387
+  notify-send -a "state" "Battery Low (${BATTERY_LEVEL}%)" "You might want to plug in your PC." -u critical -i "battery-caution" -r 9991 -h "string:fgcolor:${warn_color}" -h "string:frcolor:${warn_color}"
   touch $FILE_WARNING
 
 # if the battery is critical and is discharging

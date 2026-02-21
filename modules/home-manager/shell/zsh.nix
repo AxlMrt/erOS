@@ -1,18 +1,6 @@
 {...}: {
   programs.starship = {
     enable = true;
-    settings = {
-      add_newline = false;
-      format = "$directory$git_branch$git_status$cmd_duration$line_break$character";
-      character = {
-        success_symbol = "❯";
-        error_symbol = "❯";
-      };
-      cmd_duration = {
-        min_time = 500;
-        show_milliseconds = false;
-      };
-    };
   };
 
   programs.zsh = {
@@ -34,6 +22,18 @@
       bindkey -e
       bindkey '^[[1;5C' forward-word
       bindkey '^[[1;5D' backward-word
+
+      export STARSHIP_CONFIG="$HOME/.config/eros/active/theme/starship.toml"
+
+      if [ -f "$HOME/.config/eros/active/theme/colors.env" ]; then
+        # shellcheck disable=SC1090
+        . "$HOME/.config/eros/active/theme/colors.env"
+      fi
+
+      if [ -f "$HOME/.config/eros/active/theme/settings.env" ]; then
+        # shellcheck disable=SC1090
+        . "$HOME/.config/eros/active/theme/settings.env"
+      fi
 
       if [ -f "$HOME/.zshrc-personal" ]; then
         source "$HOME/.zshrc-personal"

@@ -1,6 +1,4 @@
-{config, ...}: let
-  c = config.eros.theme.active.palette;
-in {
+{config, ...}: {
   services.swaync = {
     enable = true;
     settings = {
@@ -19,25 +17,7 @@ in {
     };
 
     style = ''
-      * {
-        font-family: "${config.eros.ui.fonts.ui}", "${config.eros.ui.fonts.mono}";
-        font-size: ${toString config.eros.ui.fonts.size}pt;
-      }
-
-      .notification, .control-center {
-        background: ${c.bgAlt};
-        color: ${c.fg};
-        border: 1px solid ${c.border};
-        border-radius: ${toString config.eros.ui.radius}px;
-      }
-
-      .notification-content,
-      .summary,
-      .body,
-      .widget-title,
-      .widget-label {
-        color: ${c.fg};
-      }
+      @import url("file://${config.home.homeDirectory}/.config/eros/active/theme/swaync.css");
     '';
   };
 }

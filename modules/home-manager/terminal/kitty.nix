@@ -1,5 +1,5 @@
 {config, ...}: let
-  c = config.eros.theme.active.palette;
+  t = config.eros.theme.active;
 in {
   programs.kitty = {
     enable = true;
@@ -11,36 +11,15 @@ in {
       wheel_scroll_min_lines = 1;
       scrollback_lines = 10000;
       window_padding_width = 8;
-      background_opacity = 0.8;
+      background_opacity = t.terminal.opacity;
       dynamic_background_opacity = false;
       cursor_shape = "block";
       linux_display_server = "wayland";
+      allow_remote_control = true;
     };
 
     extraConfig = ''
-      foreground ${c.fg}
-      background ${c.bg}
-      selection_foreground ${c.bg}
-      selection_background ${c.accent}
-      cursor ${c.fg}
-      cursor_text_color ${c.bg}
-
-      color0 ${c.bgAlt}
-      color8 ${c.border}
-      color1 ${c.error}
-      color9 ${c.warn}
-      color2 ${c.ok}
-      color10 ${c.ok}
-      color3 ${c.warn}
-      color11 ${c.warn}
-      color4 ${c.accent}
-      color12 ${c.fgMuted}
-      color5 ${c.fgMuted}
-      color13 ${c.accent}
-      color6 ${c.accent}
-      color14 ${c.fg}
-      color7 ${c.fg}
-      color15 ${c.fgMuted}
+      include ~/.config/eros/active/theme/kitty.conf
 
       map ctrl+shift+v paste_from_clipboard
       map ctrl+shift+c copy_to_clipboard

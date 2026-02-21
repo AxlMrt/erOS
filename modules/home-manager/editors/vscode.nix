@@ -81,8 +81,8 @@ in {
           ++ glassItExts
           ++ codeRunnerExts;
         userSettings = lib.mkForce {
-          "workbench.colorTheme" = config.eros.theme.active.vscodeTheme;
-          "workbench.iconTheme" = config.eros.theme.active.vscodeIconTheme;
+          "workbench.colorTheme" = config.eros.theme.active.vscode.theme;
+          "workbench.iconTheme" = config.eros.theme.active.vscode.iconTheme;
           "editor.formatOnSave" = true;
         };
       };

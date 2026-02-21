@@ -3,9 +3,9 @@
   config,
   ...
 }: let
-  c = config.eros.theme.active.palette;
   scriptsDir = ./scripts;
   scripts = builtins.attrNames (builtins.readDir scriptsDir);
+  themectl = "/etc/profiles/per-user/${config.home.username}/bin/eros-themectl";
 in {
   home.packages = with pkgs; [
     brightnessctl
@@ -31,6 +31,7 @@ in {
 
   programs.waybar = {
     enable = true;
+    systemd.enable = true;
     package = pkgs.waybar;
     settings = [
       {
@@ -41,11 +42,17 @@ in {
         spacing = 3;
         "fixed-center" = true;
         ipc = true;
+        reload_style_on_change = true;
+        "on-sigusr2" = "reload";
         "margin-top" = 4;
         "margin-left" = 8;
         "margin-right" = 8;
 
         modules-left = [
+          "custom/theme_switch"
+          "custom/separator#blank"
+          "custom/wallpaper_switch"
+          "custom/separator#blank"
           "custom/menu"
           "custom/separator#blank"
           "custom/playerctl"
@@ -184,8 +191,25 @@ in {
 
         "custom/menu" = {
           format = "";
-          "on-click" = "pkill rofi || rofi -show drun -modi run,drun,window";
+          "on-click" = "pkill rofi || rofi -show drun -modi run,drun,window -theme $HOME/.config/eros/active/theme/rofi.rasi";
           "tooltip-format" = "Rofi Menu";
+          tooltip = true;
+        };
+
+        "custom/theme_switch" = {
+          "return-type" = "json";
+          exec = "${themectl} status-theme";
+          interval = 1;
+          "on-click" = "sh -lc '${themectl} next >/dev/null 2>&1 &'";
+          tooltip = true;
+        };
+
+        "custom/wallpaper_switch" = {
+          "return-type" = "json";
+          exec = "${themectl} status-wallpaper";
+          interval = "once";
+          "on-click" = "sh -lc '${themectl} wallpaper next >/dev/null 2>&1 &'";
+          "on-click-right" = "sh -lc '${themectl} wallpaper default >/dev/null 2>&1 &'";
           tooltip = true;
         };
 
@@ -227,13 +251,13 @@ in {
           "tooltip-format" = "Left Click: notifications\nRight Click: Do Not Disturb";
           format = "{} {icon}";
           "format-icons" = {
-            notification = "<span foreground='${c.error}'><sup></sup></span>";
+            notification = " ";
             none = "";
-            "dnd-notification" = "<span foreground='${c.error}'><sup></sup></span>";
+            "dnd-notification" = " ";
             "dnd-none" = "";
-            "inhibited-notification" = "<span foreground='${c.error}'><sup></sup></span>";
+            "inhibited-notification" = " ";
             "inhibited-none" = "";
-            "dnd-inhibited-notification" = "<span foreground='${c.error}'><sup></sup></span>";
+            "dnd-inhibited-notification" = " ";
             "dnd-inhibited-none" = "";
           };
           "return-type" = "json";
@@ -268,11 +292,11 @@ in {
             "weeks-pos" = "right";
             "on-scroll" = 1;
             format = {
-              months = "<span color='${c.warn}'><b>{}</b></span>";
-              days = "<span color='${c.fgMuted}'><b>{}</b></span>";
-              weeks = "<span color='${c.accent}'><b>W{:%V}</b></span>";
-              weekdays = "<span color='${c.fg}'><b>{}</b></span>";
-              today = "<span color='${c.error}'><b><u>{}</u></b></span>";
+              months = "<b>{}</b>";
+              days = "<b>{}</b>";
+              weeks = "<b>W{:%V}</b>";
+              weekdays = "<b>{}</b>";
+              today = "<b><u>{}</u></b>";
             };
           };
         };
@@ -384,130 +408,7 @@ in {
     ];
 
     style = ''
-      * {
-        font-family: "${config.eros.ui.fonts.mono}";
-        font-weight: bold;
-        min-height: 0;
-        font-size: 97%;
-      }
-
-      window#waybar {
-        transition-property: background-color;
-        transition-duration: 0.5s;
-        background: transparent;
-        border-radius: 10px;
-      }
-
-      window#waybar.hidden {
-        opacity: 0.2;
-      }
-
-      .modules-left,
-      .modules-center,
-      .modules-right {
-        font-weight: bold;
-        margin: 0 10px;
-        margin-top: 4px;
-        background: alpha(${c.bg}, 0.78);
-        border: 1px solid alpha(${c.border}, 0.7);
-        padding: 0 4px;
-        border-radius: 20px;
-      }
-
-      #backlight,
-      #battery,
-      #clock,
-      #cpu,
-      #memory,
-      #network,
-      #pulseaudio,
-      #tray,
-      #window,
-      #workspaces,
-      #idle_inhibitor,
-      #custom-menu,
-      #custom-power,
-      #custom-swaync,
-      #custom-playerctl,
-      #custom-tty,
-      #custom-cpu_temp,
-      #custom-wifi_status {
-        padding: 3px 6px;
-      }
-
-      #custom-menu { color: ${c.accent}; }
-      #custom-power { color: ${c.error}; }
-      #custom-swaync { color: ${c.accent}; }
-      #custom-playerctl { color: ${c.fgMuted}; }
-      #custom-wifi_status,
-      #network { color: ${c.accent}; }
-      #clock { color: ${c.fg}; }
-      #cpu,
-      #pulseaudio { color: ${c.ok}; }
-      #memory,
-      #backlight,
-      #idle_inhibitor { color: ${c.fgMuted}; }
-      #window { color: ${c.fg}; }
-
-      #battery {
-        color: ${c.ok};
-      }
-
-      #battery.critical:not(.charging) {
-        background-color: ${c.error};
-        color: ${c.bg};
-        animation-name: blink;
-        animation-duration: 0.5s;
-        animation-timing-function: linear;
-        animation-iteration-count: infinite;
-        animation-direction: alternate;
-      }
-
-      @keyframes blink {
-        to { opacity: 0.45; }
-      }
-
-      #workspaces button {
-        box-shadow: none;
-        text-shadow: none;
-        padding: 0 4px;
-        border-radius: 9px;
-        color: ${c.fgMuted};
-        transition: all 0.2s ease-in-out;
-      }
-
-      #workspaces button:hover {
-        border-radius: 10px;
-        color: ${c.bg};
-        background-color: ${c.surface};
-        padding-left: 2px;
-        padding-right: 2px;
-      }
-
-      #workspaces button.active {
-        color: ${c.accent};
-        border-radius: 10px;
-        padding-left: 8px;
-        padding-right: 8px;
-      }
-
-      #workspaces button.urgent {
-        color: ${c.error};
-      }
-
-      #network.disconnected,
-      #network.disabled,
-      #custom-wifi_status.disconnected {
-        background-color: alpha(${c.surface}, 0.9);
-        color: ${c.fg};
-      }
-
-      tooltip {
-        border-radius: ${toString config.eros.ui.radius}px;
-        border: 1px solid alpha(${c.border}, 0.8);
-        background: alpha(${c.bg}, 0.92);
-        color: ${c.fg};
-      }
+      @import url("file://${config.home.homeDirectory}/.config/eros/active/theme/waybar.css");
     '';
   };
 }

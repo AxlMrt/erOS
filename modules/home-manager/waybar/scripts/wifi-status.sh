@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
 
+theme_env="$HOME/.config/eros/active/theme/colors.env"
+if [ -f "$theme_env" ]; then
+  # shellcheck disable=SC1090
+  . "$theme_env"
+fi
+
+error_color="${EROS_COLOR_ERROR:-#bf616a}"
+
 # This script gathers detailed Wi-Fi connection information.
 # It collects the following fields:
 #
@@ -60,7 +68,7 @@
 #   a modern high-speed standard.
 
 if ! command -v nmcli &>/dev/null; then
-  echo "{\"text\": \"<span color='#f38ba8'>󰤫</span>\", \"tooltip\": \"nmcli utility is missing\"}"
+  echo "{\"text\": \"<span color='${error_color}'>󰤫</span>\", \"tooltip\": \"nmcli utility is missing\"}"
   exit 1
 fi
 
@@ -170,7 +178,7 @@ elif [ "$signal" -ge 40 ]; then
 elif [ "$signal" -ge 20 ]; then
   icon="󰤟" # Very weak signal
 else
-  icon="<span color='#f38ba8'>󰤯</span>" # No signal
+  icon="<span color='${error_color}'>󰤯</span>" # No signal
 fi
 
 # Module and tooltip

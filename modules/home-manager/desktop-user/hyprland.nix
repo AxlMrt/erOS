@@ -1,6 +1,4 @@
-{config, ...}: let
-  p = config.eros.theme.active.palette;
-in {
+{config, ...}: {
   wayland.windowManager.hyprland = {
     enable = true;
     settings = {
@@ -8,8 +6,7 @@ in {
       monitor = ",preferred,auto,1";
 
       exec-once = [
-        "eros-wallpaper-apply"
-        "waybar"
+        "/etc/profiles/per-user/${config.home.username}/bin/eros-themectl init"
         "swaync"
         "wl-paste --type text --watch cliphist store"
         "wl-paste --type image --watch cliphist store"
@@ -19,8 +16,6 @@ in {
         gaps_in = config.eros.ui.gap;
         gaps_out = config.eros.ui.gap;
         border_size = 1;
-        "col.active_border" = "rgb(${builtins.substring 1 6 p.accent})";
-        "col.inactive_border" = "rgb(${builtins.substring 1 6 p.border})";
         layout = "dwindle";
       };
 
@@ -42,11 +37,11 @@ in {
 
       bind = [
         "$mod, T, exec, kitty"
-        "$mod, D, exec, rofi -show drun"
-        "$mod SHIFT, D, exec, rofi -show run"
+        "$mod, D, exec, rofi -show drun -theme $HOME/.config/eros/active/theme/rofi.rasi"
+        "$mod SHIFT, D, exec, rofi -show run -theme $HOME/.config/eros/active/theme/rofi.rasi"
         "$mod, F, exec, firefox"
         "$mod, N, exec, swaync-client -t"
-        "$mod, C, exec, cliphist list | rofi -dmenu | cliphist decode | wl-copy"
+        "$mod, C, exec, cliphist list | rofi -dmenu -theme $HOME/.config/eros/active/theme/rofi.rasi | cliphist decode | wl-copy"
         "$mod, Q, killactive"
         "$mod SHIFT, Q, exit"
         "$mod, Return, fullscreen, 1"
@@ -74,5 +69,9 @@ in {
         "suppress_event maximize, match:class .*"
       ];
     };
+
+    extraConfig = ''
+      source = ~/.config/eros/active/theme/hyprland-theme.conf
+    '';
   };
 }
