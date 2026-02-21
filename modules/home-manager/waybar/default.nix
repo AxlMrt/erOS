@@ -441,6 +441,7 @@ in {
       #custom-playerctl { color: ${c.fgMuted}; }
       #custom-wifi_status,
       #network { color: ${c.accent}; }
+      #clock { color: ${c.fg}; }
       #cpu,
       #pulseaudio { color: ${c.ok}; }
       #memory,
