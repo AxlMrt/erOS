@@ -1,177 +1,52 @@
-{
-  pkgs,
-  config,
-  lib,
-  ...
-}: let
+{config, ...}: let
   c = config.eros.theme.active.palette;
 in {
   programs.kitty = {
     enable = true;
-
-    # Upstream test failures resolved; use default kitty package (>= 0.44).
-    package = pkgs.kitty;
     settings = {
-      font_family = "Maple Mono NF";
-      font_size = 12;
-      wheel_scroll_min_lines = 1;
-      window_padding_width = 4;
+      font_family = config.eros.ui.fonts.mono;
+      font_size = config.eros.ui.fonts.size;
       confirm_os_window_close = 0;
-      scrollback_lines = 10000;
       enable_audio_bell = false;
-      mouse_hide_wait = 60;
-      cursor_trail = 1;
-      tab_fade = 1;
-      active_tab_font_style = "bold";
-      inactive_tab_font_style = "bold";
-      tab_bar_edge = "top";
-      tab_bar_margin_width = 0;
-      tab_bar_style = "powerline";
-      #tab_bar_style = "fade";
-      enabled_layouts = "splits";
-      open_url_with_default = true;
-      detect_urls = true;
-      allow_remote_control = true;
-      background_opacity = 0.85;
-      dynamic_background_opacity = true;
-      blur = true;
-      background_blur = 20;
-
+      wheel_scroll_min_lines = 1;
+      scrollback_lines = 10000;
+      window_padding_width = 8;
+      background_opacity = 0.8;
+      dynamic_background_opacity = false;
+      cursor_shape = "block";
       linux_display_server = "wayland";
     };
 
-    shellIntegration.enableZshIntegration = true;
-    shellIntegration.enableFishIntegration = true;
-    shellIntegration.enableBashIntegration = true;
-    shellIntegration.mode = "enabled";
-
     extraConfig = ''
+      foreground ${c.fg}
+      background ${c.bg}
+      selection_foreground ${c.bg}
+      selection_background ${c.accent}
+      cursor ${c.fg}
+      cursor_text_color ${c.bg}
 
-      #open_url_with default
-      url_prefixes file ftp ftps gemini git gopher http https irc ircs kitty sftp ssh
-      #detect_urls yes
+      color0 ${c.bgAlt}
+      color8 ${c.border}
+      color1 ${c.error}
+      color9 ${c.warn}
+      color2 ${c.ok}
+      color10 ${c.ok}
+      color3 ${c.warn}
+      color11 ${c.warn}
+      color4 ${c.accent}
+      color12 ${c.fgMuted}
+      color5 ${c.fgMuted}
+      color13 ${c.accent}
+      color6 ${c.accent}
+      color14 ${c.fg}
+      color7 ${c.fg}
+      color15 ${c.fgMuted}
 
-        # Clipboard
-        map ctrl+shift+v        paste_from_selection
-        map shift+insert        paste_from_selection
-
-        # Scrolling
-        map ctrl+shift+up        scroll_line_up
-        map ctrl+shift+down      scroll_line_down
-        map ctrl+shift+k         scroll_line_up
-        map ctrl+shift+j         scroll_line_down
-        map ctrl+shift+page_up   scroll_page_up
-        map ctrl+shift+page_down scroll_page_down
-        map ctrl+shift+home      scroll_home
-        map ctrl+shift+end       scroll_end
-        map ctrl+shift+h         show_scrollback
-
-        # Window management
-        map alt+n               new_window_with_cwd
-        #map alt+n              new_os_window
-        map alt+w               close_window
-        map ctrl+shift+enter    launch --location=hsplit
-        map ctrl+shift+s        launch --location=vsplit
-        map ctrl+shift+]        next_window
-        map ctrl+shift+[        previous_window
-        map ctrl+shift+f        move_window_forward
-        map ctrl+shift+b        move_window_backward
-        map ctrl+shift+`        move_window_to_top
-        map ctrl+shift+1        first_window
-        map ctrl+shift+2        second_window
-        map ctrl+shift+3        third_window
-        map ctrl+shift+4        fourth_window
-        map ctrl+shift+5        fifth_window
-        map ctrl+shift+6        sixth_window
-        map ctrl+shift+7        seventh_window
-        map ctrl+shift+8        eighth_window
-        map ctrl+shift+9        ninth_window # Tab management
-        map ctrl+shift+0        tenth_window
-        map ctrl+shift+right    next_tab
-        map ctrl+shift+left     previous_tab
-        map ctrl+shift+t        new_tab
-        map ctrl+shift+q        close_tab
-        map ctrl+shift+l        next_layout
-        map ctrl+shift+.        move_tab_forward
-        map ctrl+shift+,        move_tab_backward
-
-        # Miscellaneous
-        map ctrl+shift+up      increase_font_size
-        map ctrl+shift+down    decrease_font_size
-        map ctrl+shift+backspace restore_font_size
-
-        # The basic colors
-        foreground              ${c.text}
-        background              ${c.base}
-        selection_foreground    ${c.base}
-        selection_background    ${c.rosewater}
-
-        # Cursor colors
-        cursor                  ${c.rosewater}
-        cursor_text_color       ${c.base}
-
-        # URL underline color when hovering with mouse
-        url_color               ${c.rosewater}
-
-        # Kitty window border colors
-        active_border_color     ${c.lavender}
-        inactive_border_color   ${c.overlay0}
-        bell_border_color       ${c.yellow}
-
-        # OS Window titlebar colors
-        wayland_titlebar_color system
-        macos_titlebar_color system
-
-        # Tab bar colors
-        active_tab_foreground   ${c.crust}
-        active_tab_background   ${c.mauve}
-        inactive_tab_foreground ${c.text}
-        inactive_tab_background ${c.mantle}
-        tab_bar_background      ${c.crust}
-
-        # Colors for marks (marked text in the terminal)
-        mark1_foreground ${c.base}
-        mark1_background ${c.lavender}
-        mark2_foreground ${c.base}
-        mark2_background ${c.mauve}
-        mark3_foreground ${c.base}
-        mark3_background ${c.sapphire}
-
-        # The 16 terminal colors
-
-        # black
-        color0 ${c.surface1}
-        color8 ${c.surface2}
-
-        # red
-        color1 ${c.red}
-        color9 ${c.red}
-
-        # green
-        color2  ${c.green}
-        color10 ${c.green}
-
-        # yellow
-        color3  ${c.yellow}
-        color11 ${c.yellow}
-
-        # blue
-        color4  ${c.blue}
-        color12 ${c.blue}
-
-        # magenta
-        color5  ${c.pink}
-        color13 ${c.pink}
-
-        # cyan
-        color6  ${c.teal}
-        color14 ${c.teal}
-
-        # white
-        color7  ${c.subtext1}
-        color15 ${c.subtext0}
-
-
+      map ctrl+shift+v paste_from_clipboard
+      map ctrl+shift+c copy_to_clipboard
+      map ctrl+shift+enter new_window_with_cwd
+      map ctrl+shift+t new_tab
+      map ctrl+shift+q close_tab
     '';
   };
 }

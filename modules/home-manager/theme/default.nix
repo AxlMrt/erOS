@@ -6,7 +6,7 @@
 }: let
   inherit (lib) mkOption mkIf types mapAttrs filterAttrs;
 
-  imagePattern = ".*\\.(png|jpg|jpeg|webp|avif|bmp|tiff)$";
+  imagePattern = ".*\\.(png|jpg|jpeg|webp|avif|bmp|tiff|gif)$";
 
   isWallpaperFile = name: fileType:
     (fileType == "regular" || fileType == "symlink")
@@ -20,147 +20,45 @@
     map (name: dir + "/${name}") names;
 
   baseThemes = {
-    latte = {
+    nord-night = {
+      kind = "dark";
+      wallpaper = null;
+      wallpaperDir = ../../../wallpapers/minimalist;
+      wallpapers = [];
+      vscodeTheme = "Default Dark Modern";
+      vscodeIconTheme = "vs-seti";
+      palette = {
+        bg = "#2e3440";
+        bgAlt = "#3b4252";
+        surface = "#434c5e";
+        border = "#4c566a";
+        fg = "#eceff4";
+        fgMuted = "#d8dee9";
+        accent = "#88c0d0";
+        ok = "#a3be8c";
+        warn = "#ebcb8b";
+        error = "#bf616a";
+      };
+    };
+
+    nord-snow = {
       kind = "light";
-      wallpaperDir = ../../../wallpapers/catppuccin/latte;
+      wallpaper = null;
+      wallpaperDir = null;
       wallpapers = [];
-      vscodeTheme = "Catppuccin Latte";
-      vscodeIconTheme = "catppuccin-latte";
+      vscodeTheme = "Default Light+";
+      vscodeIconTheme = "vs-seti";
       palette = {
-        rosewater = "#dc8a78";
-        flamingo = "#dd7878";
-        pink = "#ea76cb";
-        mauve = "#8839ef";
-        red = "#d20f39";
-        maroon = "#e64553";
-        peach = "#fe640b";
-        yellow = "#df8e1d";
-        green = "#40a02b";
-        teal = "#179299";
-        sky = "#04a5e5";
-        sapphire = "#209fb5";
-        blue = "#1e66f5";
-        lavender = "#7287fd";
-        text = "#4c4f69";
-        subtext1 = "#5c5f77";
-        subtext0 = "#6c6f85";
-        overlay2 = "#7c7f93";
-        overlay1 = "#8c8fa1";
-        overlay0 = "#9ca0b0";
-        surface2 = "#acb0be";
-        surface1 = "#bcc0cc";
-        surface0 = "#ccd0da";
-        base = "#eff1f5";
-        mantle = "#e6e9ef";
-        crust = "#dce0e8";
-      };
-    };
-
-    frappe = {
-      kind = "dark";
-      wallpaperDir = ../../../wallpapers/catppuccin/frappe;
-      wallpapers = [];
-      vscodeTheme = "Catppuccin Frappé";
-      vscodeIconTheme = "catppuccin-frappe";
-      palette = {
-        rosewater = "#f2d5cf";
-        flamingo = "#eebebe";
-        pink = "#f4b8e4";
-        mauve = "#ca9ee6";
-        red = "#e78284";
-        maroon = "#ea999c";
-        peach = "#ef9f76";
-        yellow = "#e5c890";
-        green = "#a6d189";
-        teal = "#81c8be";
-        sky = "#99d1db";
-        sapphire = "#85c1dc";
-        blue = "#8caaee";
-        lavender = "#babbf1";
-        text = "#c6d0f5";
-        subtext1 = "#b5bfe2";
-        subtext0 = "#a5adce";
-        overlay2 = "#949cbb";
-        overlay1 = "#838ba7";
-        overlay0 = "#737994";
-        surface2 = "#626880";
-        surface1 = "#51576d";
-        surface0 = "#414559";
-        base = "#303446";
-        mantle = "#292c3c";
-        crust = "#232634";
-      };
-    };
-
-    macchiato = {
-      kind = "dark";
-      wallpaperDir = ../../../wallpapers/catppuccin/macchiato;
-      wallpapers = [];
-      vscodeTheme = "Catppuccin Macchiato";
-      vscodeIconTheme = "catppuccin-macchiato";
-      palette = {
-        rosewater = "#f4dbd6";
-        flamingo = "#f0c6c6";
-        pink = "#f5bde6";
-        mauve = "#c6a0f6";
-        red = "#ed8796";
-        maroon = "#ee99a0";
-        peach = "#f5a97f";
-        yellow = "#eed49f";
-        green = "#a6da95";
-        teal = "#8bd5ca";
-        sky = "#91d7e3";
-        sapphire = "#7dc4e4";
-        blue = "#8aadf4";
-        lavender = "#b7bdf8";
-        text = "#cad3f5";
-        subtext1 = "#b8c0e0";
-        subtext0 = "#a5adcb";
-        overlay2 = "#939ab7";
-        overlay1 = "#8087a2";
-        overlay0 = "#6e738d";
-        surface2 = "#5b6078";
-        surface1 = "#494d64";
-        surface0 = "#363a4f";
-        base = "#24273a";
-        mantle = "#1e2030";
-        crust = "#181926";
-      };
-    };
-
-    mocha = {
-      kind = "dark";
-      wallpaperDir = ../../../wallpapers/catppuccin/mocha;
-      wallpapers = [];
-      vscodeTheme = "Catppuccin Mocha";
-      vscodeIconTheme = "catppuccin-mocha";
-      palette = {
-        rosewater = "#f5e0dc";
-        flamingo = "#f2cdcd";
-        pink = "#f5c2e7";
-        mauve = "#cba6f7";
-        red = "#f38ba8";
-        maroon = "#eba0ac";
-        peach = "#fab387";
-        yellow = "#f9e2af";
-        green = "#a6e3a1";
-        teal = "#94e2d5";
-        sky = "#89dceb";
-        sapphire = "#74c7ec";
-        blue = "#89b4fa";
-        lavender = "#b4befe";
-        text = "#cdd6f4";
-        subtext1 = "#bac2de";
-        subtext0 = "#a6adc8";
-        overlay2 = "#9399b2";
-        overlay1 = "#7f849c";
-        overlay0 = "#6c7086";
-        surface2 = "#585b70";
-        surface1 = "#45475a";
-        surface0 = "#313244";
-        base = "#1e1e2e";
-        mantle = "#181825";
-        crust = "#11111b";
+        bg = "#eceff4";
+        bgAlt = "#e5e9f0";
+        surface = "#d8dee9";
+        border = "#4c566a";
+        fg = "#2e3440";
+        fgMuted = "#434c5e";
+        accent = "#5e81ac";
+        ok = "#a3be8c";
+        warn = "#d08770";
+        error = "#bf616a";
       };
     };
   };
@@ -169,7 +67,7 @@
 
   resolvedThemes = mapAttrs (_: theme: let
     dirWallpapers =
-      if theme.wallpaperDir == null
+      if theme.wallpaperDir == null || !builtins.pathExists theme.wallpaperDir
       then []
       else wallpapersFromDir theme.wallpaperDir;
     allWallpapers =
@@ -181,13 +79,49 @@
     // {
       wallpapers = allWallpapers;
       wallpaper =
-        if allWallpapers == []
+        if theme.wallpaper != null
+        then theme.wallpaper
+        else if allWallpapers == []
         then null
         else builtins.head allWallpapers;
     })
   mergedThemes;
 
   selectedTheme = resolvedThemes.${config.eros.theme.variant};
+
+  withCompatPalette = mapAttrs (_name: theme: let
+    p = theme.palette;
+  in
+    theme
+    // {
+      palette =
+        p
+        // {
+          base = p.bg;
+          mantle = p.bgAlt;
+          crust = p.bg;
+          surface0 = p.surface;
+          surface1 = p.surface;
+          surface2 = p.border;
+          overlay0 = p.border;
+          overlay1 = p.fgMuted;
+          overlay2 = p.fgMuted;
+          text = p.fg;
+          subtext0 = p.fgMuted;
+          subtext1 = p.fgMuted;
+          blue = p.accent;
+          green = p.ok;
+          yellow = p.warn;
+          red = p.error;
+          rosewater = p.fg;
+          lavender = p.accent;
+          mauve = p.accent;
+          teal = p.accent;
+          peach = p.warn;
+          pink = p.accent;
+        };
+    })
+  resolvedThemes;
 
   activeWallpapers = selectedTheme.wallpapers;
   activeWallpaper =
@@ -200,119 +134,161 @@
     then ""
     else lib.concatStringsSep "\n" (map toString activeWallpapers) + "\n";
 in {
-  options.eros.theme = {
-    enable = mkOption {
-      type = types.bool;
-      default = true;
-      description = "Enable global theme registry and theme helper commands.";
-    };
+  options = {
+    eros.ui = {
+      enable = mkOption {
+        type = types.bool;
+        default = true;
+        description = "Enable shared UI design-system tokens.";
+      };
 
-    variant = mkOption {
-      type = types.str;
-      default = "mocha";
-      description = "Active theme key for the desktop session.";
-    };
+      density = mkOption {
+        type = types.enum ["compact" "cozy"];
+        default = "compact";
+        description = "Global UI density preset.";
+      };
 
-    themes = mkOption {
-      type = types.attrsOf (types.submodule ({...}: {
-        options = {
-          kind = mkOption {
-            type = types.enum ["light" "dark"];
-            default = "dark";
-          };
+      radius = mkOption {
+        type = types.int;
+        default = 6;
+        description = "Global corner radius token.";
+      };
 
-          wallpaperDir = mkOption {
-            type = types.nullOr types.path;
-            default = null;
-            description = "Directory containing wallpapers for this theme.";
-          };
+      gap = mkOption {
+        type = types.int;
+        default = 8;
+        description = "Global spacing token in px.";
+      };
 
-          wallpapers = mkOption {
-            type = types.listOf types.path;
-            default = [];
-            description = "Explicit wallpaper list. If non-empty, overrides wallpaperDir scan.";
-          };
-
-          vscodeTheme = mkOption {
-            type = types.str;
-            default = "Default Dark+";
-          };
-
-          vscodeIconTheme = mkOption {
-            type = types.str;
-            default = "vs-seti";
-          };
-
-          palette = mkOption {
-            type = types.attrsOf types.str;
-            default = {};
-          };
+      fonts = {
+        ui = mkOption {
+          type = types.str;
+          default = "Inter";
+          description = "UI font family.";
         };
-      }));
-      default = {};
-      description = "Custom themes merged with built-in Catppuccin themes.";
+
+        mono = mkOption {
+          type = types.str;
+          default = "JetBrainsMono Nerd Font";
+          description = "Monospace font family.";
+        };
+
+        size = mkOption {
+          type = types.int;
+          default = 11;
+          description = "Default UI/terminal font size.";
+        };
+      };
     };
 
-    registry = mkOption {
-      type = types.attrsOf types.anything;
-      default = resolvedThemes;
-      readOnly = true;
-      description = "Resolved Catppuccin registry.";
-    };
+    eros.theme = {
+      enable = mkOption {
+        type = types.bool;
+        default = true;
+        description = "Enable global theme registry.";
+      };
 
-    active = mkOption {
-      type = types.attrsOf types.anything;
-      default = selectedTheme;
-      readOnly = true;
-      description = "Resolved active theme.";
+      variant = mkOption {
+        type = types.str;
+        default = "nord-night";
+        description = "Active theme key for the desktop session.";
+      };
+
+      themes = mkOption {
+        type = types.attrsOf (types.submodule ({...}: {
+          options = {
+            kind = mkOption {
+              type = types.enum ["light" "dark"];
+              default = "dark";
+            };
+
+            wallpaper = mkOption {
+              type = types.nullOr types.path;
+              default = null;
+            };
+
+            wallpaperDir = mkOption {
+              type = types.nullOr types.path;
+              default = null;
+            };
+
+            wallpapers = mkOption {
+              type = types.listOf types.path;
+              default = [];
+            };
+
+            vscodeTheme = mkOption {
+              type = types.str;
+              default = "Default Dark+";
+            };
+
+            vscodeIconTheme = mkOption {
+              type = types.str;
+              default = "vs-seti";
+            };
+
+            palette = mkOption {
+              type = types.attrsOf types.str;
+              default = {};
+            };
+          };
+        }));
+        default = {};
+        description = "Custom themes merged with built-in minimal themes.";
+      };
+
+      registry = mkOption {
+        type = types.attrsOf types.anything;
+        default = withCompatPalette;
+        readOnly = true;
+      };
+
+      active = mkOption {
+        type = types.attrsOf types.anything;
+        default = withCompatPalette.${config.eros.theme.variant};
+        readOnly = true;
+      };
     };
   };
 
   config = mkIf config.eros.theme.enable {
     assertions = [
       {
-        assertion = builtins.hasAttr config.eros.theme.variant resolvedThemes;
-        message = "eros.theme.variant='${config.eros.theme.variant}' is undefined. Add it in eros.theme.themes or use an existing key.";
-      }
-      {
-        assertion = selectedTheme.wallpapers != [];
-        message = "Theme '${config.eros.theme.variant}' has no wallpapers. Add files to wallpaperDir or set eros.theme.themes.<name>.wallpapers.";
+        assertion = builtins.hasAttr config.eros.theme.variant withCompatPalette;
+        message = "eros.theme.variant='${config.eros.theme.variant}' is undefined.";
       }
     ];
 
     home.file.".config/eros/theme-wallpapers.txt".text = wallpaperListText;
 
     home.packages = [
-      (pkgs.writeShellScriptBin "qs-wallpapers-apply" ''
+      (pkgs.writeShellScriptBin "eros-wallpaper-apply" ''
         set -euo pipefail
 
         wallpaper="''${1:-}"
-
         list_file="$HOME/.config/eros/theme-wallpapers.txt"
-        if [ -z "$wallpaper" ]; then
-          if [ -f "$list_file" ] && [ -s "$list_file" ]; then
-            wallpaper=$(shuf -n 1 "$list_file")
-          fi
+
+        if [ -z "$wallpaper" ] && [ -f "$list_file" ] && [ -s "$list_file" ]; then
+          wallpaper=$(shuf -n 1 "$list_file")
         fi
 
         if [ -z "$wallpaper" ]; then
           wallpaper='${activeWallpaper}'
         fi
 
-        if [ ! -f "$wallpaper" ]; then
-          echo "qs-wallpapers-apply: wallpaper not found: $wallpaper" >&2
-          exit 1
+        if [ -z "$wallpaper" ] || [ ! -f "$wallpaper" ]; then
+          echo "eros-wallpaper-apply: no valid wallpaper found" >&2
+          exit 0
         fi
 
         if ! command -v swww >/dev/null 2>&1 || ! command -v swww-daemon >/dev/null 2>&1; then
-          echo "qs-wallpapers-apply: swww/swww-daemon not available in PATH" >&2
-          exit 1
+          exit 0
         fi
 
         if ! swww query >/dev/null 2>&1; then
           swww-daemon >/dev/null 2>&1 &
           disown || true
-          for _ in $(seq 1 40); do
+          for _ in $(seq 1 30); do
             if swww query >/dev/null 2>&1; then
               break
             fi
@@ -321,11 +297,12 @@ in {
         fi
 
         swww img "$wallpaper" --resize crop
-
-        state_dir="''${XDG_STATE_HOME:-$HOME/.local/state}/qs-wallpapers"
-        mkdir -p "$state_dir"
-        printf '%s\n' "$wallpaper" > "$state_dir/current_wallpaper"
       '')
     ];
+
+    home.sessionVariables = {
+      EROS_UI_DENSITY = config.eros.ui.density;
+      EROS_THEME_VARIANT = config.eros.theme.variant;
+    };
   };
 }

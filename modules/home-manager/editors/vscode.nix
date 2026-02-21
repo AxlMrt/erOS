@@ -24,14 +24,13 @@
     then [fromOpenVSX]
     else if version == null
     then []
+    else if sha256 == null
+    then builtins.throw "VSCode extension ${publisher}.${name} requires a pinned sha256 when fetched from Marketplace"
     else
       pkgs.vscode-utils.extensionsFromVscodeMarketplace [
         {
           inherit name publisher version;
-          sha256 =
-            if sha256 == null
-            then pkgs.lib.fakeSha256
-            else sha256;
+          inherit sha256;
         }
       ];
   hyprlangExts = extOrMarketplace {
@@ -50,7 +49,7 @@
     publisher = "formulahendry";
     name = "code-runner";
     version = codeRunnerVer;
-    sha256 = pkgs.lib.fakeSha256;
+    sha256 = null;
   };
   glassItExts = extOrMarketplace {
     publisher = "s-nlf-fh";

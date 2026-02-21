@@ -1,6 +1,6 @@
 # ErOS
 
-A reproducible NixOS + Home Manager setup with profile-based outputs.
+A reproducible, minimal, productivity-focused NixOS + Home Manager setup.
 
 ## Overview
 
@@ -10,6 +10,7 @@ ErOS is built around:
 - reusable modules,
 - user-session configuration via Home Manager,
 - selectable profiles (`base`, `desktop`, `pentest`).
+- a unified design system (single palette, typography, spacing).
 
 ## Requirements
 
@@ -23,6 +24,9 @@ ErOS is built around:
 # Validate
 nix --extra-experimental-features 'nix-command flakes' flake check
 
+# Available outputs
+nix flake show
+
 # Apply desktop profile for default host
 sudo nixos-rebuild switch --flake .#default-desktop
 
@@ -33,15 +37,29 @@ sudo nixos-rebuild switch --flake .#default-pentest
 nix --extra-experimental-features 'nix-command flakes' flake update
 ```
 
+## UX Stack
+
+- WM/session: Hyprland + greetd
+- Bar: Waybar (essential + light perf)
+- Launcher: Rofi (`drun`, `run`)
+- Terminal: Kitty
+- Shell/prompt: Zsh + Starship
+- Notifications: swaync
+- Clipboard: wl-clipboard + cliphist
+
 ## Keybindings
 
 Hyprland keybindings currently configured:
 
-- `SUPER + F` → launch Firefox
 - `SUPER + T` → launch Kitty
-- `SUPER + D` → open app launcher (`rofi -show drun`)
+- `SUPER + D` → launcher (`rofi -show drun`)
+- `SUPER + SHIFT + D` → command runner (`rofi -show run`)
+- `SUPER + F` → launch Firefox
+- `SUPER + N` → toggle notification center
+- `SUPER + C` → clipboard history picker
 - `SUPER + Q` → close active window
-- `SUPER + E` → exit Hyprland session
+- `SUPER + SHIFT + Q` → exit Hyprland session
+- `SUPER + H/J/K/L` → move focus
 
 ## Project Layout
 
@@ -50,8 +68,31 @@ Hyprland keybindings currently configured:
 - `modules/core/` — base system modules
 - `modules/desktop-system/` — system desktop stack (Hyprland services, audio, portals)
 - `modules/pentest/` — offensive tooling by category
-- `modules/home-manager/` — reusable user-session modules
+- `modules/home-manager/` — user-session entrypoint
+- `modules/home-manager/theme|launcher|waybar|terminal|notifications|desktop-user|shell|editors|clipboard/` — HM feature modules
+- `modules/home-manager/shell/` — shell + prompt layer
 - `users/` — per-user Home Manager entrypoints
+
+## Migration & Rollback
+
+Recommended migration sequence:
+
+```bash
+# 1) Validate full graph
+nix --extra-experimental-features 'nix-command flakes' flake check
+
+# 2) Build before switch
+sudo nixos-rebuild build --flake .#default-desktop
+
+# 3) Apply desktop profile
+sudo nixos-rebuild switch --flake .#default-desktop
+```
+
+If needed, rollback instantly:
+
+```bash
+sudo nixos-rebuild switch --rollback
+```
 
 ## Customization
 

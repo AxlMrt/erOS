@@ -6,7 +6,7 @@
 }: {
   networking.hostName = hostname;
   networking.hosts = {
-    "10.129.2.105" = ["wingdata.htb"];
+    "10.129.3.107" = ["wingdata.htb" "ftp.wingdata.htb"];
   };
   nixpkgs.config.allowUnfree = true;
 

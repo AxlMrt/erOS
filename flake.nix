@@ -8,14 +8,11 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
-    hyprland.url = "github:hyprwm/Hyprland";
   };
 
   outputs = {
     nixpkgs,
     home-manager,
-    hyprland,
     ...
   }: let
     hosts = {
@@ -104,33 +101,7 @@
       {}
       (builtins.attrNames hosts);
   in {
-    nixosConfigurations =
-      hostConfigurations
-      // {
-        # Minimal host baseline (no GUI/home-manager).
-        base = mkHost {
-          hostName = defaultHost;
-          profiles = ["base"];
-        };
-
-        # Daily workstation profile.
-        desktop = mkHost {
-          hostName = defaultHost;
-          profiles = ["base" "desktop"];
-        };
-
-        # Full offensive-security workstation.
-        pentest = mkHost {
-          hostName = defaultHost;
-          profiles = ["base" "desktop" "pentest"];
-        };
-
-        # Keep the historical target name for compatibility.
-        default = mkHost {
-          hostName = defaultHost;
-          profiles = ["base" "desktop" "pentest"];
-        };
-      };
+    nixosConfigurations = hostConfigurations;
 
     formatter.${hosts.${defaultHost}.system} = nixpkgs.legacyPackages.${hosts.${defaultHost}.system}.alejandra;
   };
