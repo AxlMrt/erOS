@@ -9,6 +9,7 @@
   boot.loader.grub.device = "/dev/nvme0n1";
 
   networking.networkmanager.enable = true;
+  networking.firewall.enable = true;
 
   nix.settings.experimental-features = [
     "nix-command"

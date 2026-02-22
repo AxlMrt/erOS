@@ -1,102 +1,273 @@
-# ErOS
+# Eros — NixOS Cybersecurity Workstation
 
-A reproducible, minimal, productivity-focused NixOS + Home Manager setup.
+## 1. Introduction
 
-## Overview
+Eros is a NixOS workstation designed for day-to-day cybersecurity work: pentesting, lab operations, and reverse engineering.
 
-ErOS is built around:
+Core philosophy:
+- keep the base system minimal and clean,
+- isolate heavy or risky tooling in devShells,
+- drive security and OPSEC through explicit profiles,
 
-- host-based system configuration,
-- reusable modules,
-- user-session configuration via Home Manager,
-- selectable profiles (`base`, `desktop`, `pentest`).
-- a unified design system (single palette, typography, spacing).
+Operational goals:
+- avoid system pollution,
+- reduce attack surface,
+- speed up rebuild and audit workflows,
+- reduce critical mistakes during engagements.
 
-## Requirements
+## 2. Global architecture
 
-- NixOS with flakes enabled
-- a configured host under `hosts/<name>/`
-- a matching user entrypoint under `users/<name>/`
+### Components
 
-## Quick Start
+- `flake.nix`: entry point, profiles, outputs, and devShell exports.
+- `modules/core`: base system configuration.
+- `modules/security`: hardening (sudo, ssh, sysctl).
+- `modules/security/secrets-sops.nix`: encrypted secret handling with SOPS.
+- `modules/network`: firewall policy + temporary port management (`eros-portctl`).
+- `modules/opsec`: identity profile, DNS hygiene, VPN policy, and logging.
+- `modules/offensive/native`: strict minimal native toolset.
+- `modules/virtualization`: KVM/libvirt lab setup.
+- `modules/home-manager`: user layer (shell, UI, desktop tools).
+
+### Desktop shortcuts (Hyprland)
+
+| Shortcut | Action | Command |
+| --- | --- | --- |
+| `SUPER + T` | Open terminal | `kitty` |
+| `SUPER + D` | Open app launcher | `rofi -show drun` |
+| `SUPER + SHIFT + D` | Open command launcher | `rofi -show run` |
+| `SUPER + F` | Open browser | `firefox` |
+| `SUPER + N` | Toggle notification center | `swaync-client -t` |
+| `SUPER + C` | Open clipboard history picker | `cliphist list` |
+| `SUPER + Q` | Close focused window | Hyprland action |
+| `SUPER + SHIFT + Q` | Exit Hyprland session | Hyprland action |
+| `SUPER + H / J / K / L` | Move focus left / down / up / right | Hyprland action |
+
+#### Customizing keybindings
+
+Keybindings are defined in [modules/home-manager/desktop-user/hyprland.nix](modules/home-manager/desktop-user/hyprland.nix).
+
+## 3. Essential commands
+
+### System rebuild
 
 ```bash
-# Validate
+# Global validation
 nix --extra-experimental-features 'nix-command flakes' flake check
 
-# Available outputs
-nix flake show
+# Build without applying
+sudo nixos-rebuild build --flake .#default-sec-desktop
 
-# Apply desktop profile for default host
-sudo nixos-rebuild switch --flake .#default-desktop
+# Apply immediately
+sudo nixos-rebuild switch --flake .#default-sec-desktop
 
-# Apply full pentest profile for default host
-sudo nixos-rebuild switch --flake .#default-pentest
+# Apply on next boot
+sudo nixos-rebuild boot --flake .#default-sec-desktop
 
-# Update inputs
-nix --extra-experimental-features 'nix-command flakes' flake update
-```
-
-## UX Stack
-
-- WM/session: Hyprland + greetd
-- Bar: Waybar (essential + light perf)
-- Launcher: Rofi (`drun`, `run`)
-- Terminal: Kitty
-- Shell/prompt: Zsh + Starship
-- Notifications: swaync
-- Clipboard: wl-clipboard + cliphist
-
-## Keybindings
-
-Hyprland keybindings currently configured:
-
-- `SUPER + T` → launch Kitty
-- `SUPER + D` → launcher (`rofi -show drun`)
-- `SUPER + SHIFT + D` → command runner (`rofi -show run`)
-- `SUPER + F` → launch Firefox
-- `SUPER + N` → toggle notification center
-- `SUPER + C` → clipboard history picker
-- `SUPER + Q` → close active window
-- `SUPER + SHIFT + Q` → exit Hyprland session
-- `SUPER + H/J/K/L` → move focus
-
-## Project Layout
-
-- `flake.nix` — inputs, host map, output generation
-- `hosts/` — machine-specific hardware + policy
-- `modules/core/` — base system modules
-- `modules/desktop-system/` — system desktop stack (Hyprland services, audio, portals)
-- `modules/pentest/` — offensive tooling by category
-- `modules/home-manager/` — user-session entrypoint
-- `modules/home-manager/theme|launcher|waybar|terminal|notifications|desktop-user|shell|editors|clipboard/` — HM feature modules
-- `modules/home-manager/shell/` — shell + prompt layer
-- `users/` — per-user Home Manager entrypoints
-
-## Migration & Rollback
-
-Recommended migration sequence:
-
-```bash
-# 1) Validate full graph
-nix --extra-experimental-features 'nix-command flakes' flake check
-
-# 2) Build before switch
-sudo nixos-rebuild build --flake .#default-desktop
-
-# 3) Apply desktop profile
-sudo nixos-rebuild switch --flake .#default-desktop
-```
-
-If needed, rollback instantly:
-
-```bash
+# Rollback
 sudo nixos-rebuild switch --rollback
 ```
 
-## Customization
+- `switch`: activate now.
+- `boot`: activate after reboot.
+
+Useful debug commands:
+```bash
+nixos-rebuild dry-build --flake .#default-sec-desktop
+nix flake show
+```
+
+### Flake updates
+
+```bash
+# Update inputs
+nix --extra-experimental-features 'nix-command flakes' flake update
+
+# Validate after update
+nix --extra-experimental-features 'nix-command flakes' flake check
+```
+
+💡 Best practices:
+- update, then test (`build`) before `switch`.
+- review the `flake.lock` diff before validating changes.
+
+## 4. DevShells
+
+### Why they exist
+
+devShells isolate heavy/specialized offensive dependencies and prevent base-system contamination.
+
+### How to use them
+
+```bash
+nix develop .#web-pentest
+nix develop .#windows-ad
+nix develop .#reverse
+nix develop .#exploit-dev
+```
+
+### Available devShells
+
+- `web-pentest`: web application testing.
+- `network-pentest`: network/protocol assessment.
+- `windows-ad`: AD and Windows protocol operations.
+- `malware-analysis`: baseline static malware analysis tooling.
+- `osint`: open-source intelligence tooling.
+- `reverse`: reverse engineering workflows.
+- `exploit-dev`: exploit build/debug workflow.
+
+### Create a new devShell
+
+1. Create `devshells/<name>/default.nix`.
+2. Define `pkgs.mkShell { packages = [ ... ]; }`.
+3. Export it in `flake.nix` under `devShells`.
+4. Test with `nix develop .#<name> -c true`.
+
+💡 Best practices:
+- keep each shell minimal and purpose-driven,
+- pin through the flake,
+- keep heavyweight tooling out of the global system.
+
+## 5. Tool management
+
+### Native tools
+
+Managed by `modules/offensive/native` for low-risk daily usage (for example `nmap`, `tcpdump`, `curl`).
+
+### Isolated tools
+
+Placed in devShells for:
+- heavy stacks,
+- specialized dependency trees,
+- stronger OPSEC boundaries.
+
+### Add a tool correctly
+
+- frequent + low risk → native.
+- specialized / engagement-specific / heavy → devShell.
+
+> ⚠️ Attention
+> Putting too many offensive tools in the base system increases attack surface and technical debt.
+
+## 6. Network & port management
+
+Firewall policy is profile-driven (`trusted`, `untrusted`, `lab`) through `modules/network`.
+
+### Temporary port opening
+
+```bash
+# Open TCP 8080 for 15 minutes
+sudo eros-portctl open tcp 8080 900
+
+# Close explicitly
+sudo eros-portctl close tcp 8080
+```
+
+Ports are auto-closed when TTL expires.
+
+### Network profiles
+
+- `untrusted`: default offensive profile.
+- `lab`: profile for isolated lab network workflows.
+- `trusted`: controlled exposure profile.
+
+💡 OPSEC best practices:
+- stay on `untrusted` outside lab activity,
+- use short TTL values for temporary openings,
+- avoid permanent ad-hoc firewall openings.
+
+## 7. Virtualization & lab
+
+Eros uses KVM/libvirt via `default-lab-host`.
+
+### Start lab mode
+
+```bash
+sudo nixos-rebuild switch --flake .#default-lab-host
+```
+
+Lab networks:
+- `br-lab-int`: internal network.
+- `br-lab-dmz`: exposed test-services segment.
+
+Recommended usage:
+- AD/DC + clients on `br-lab-int`.
+- exposed targets on `br-lab-dmz`.
+
+Snapshots:
+- create a snapshot before destructive testing,
+- rollback snapshots after each campaign.
+
+## 8. OPSEC & security
+
+Implemented controls:
+- identity separation (`clean`, `offensive`, `lab`),
+- DNS hygiene via `systemd-resolved`,
+- profile-based VPN (OpenVPN/WireGuard),
+- bounded logs (`journald` volatile with retention cap),
+- encrypted secrets with SOPS.
+
+### Secrets gate
+
+```bash
+# Ensure tracked secrets are encrypted and placeholder-free
+nix run .#secrets-guard
+```
+
+> ⚠️ Attention
+> As long as `REPLACE_ME` remains in secret files, the guard intentionally blocks the workflow.
+
+## 9. Recommended workflows
+
+### Bug bounty (web)
+1. `nix develop .#web-pentest`
+2. run web recon and testing
+3. produce report outside shell
+
+### Red team (AD)
+1. use `default-sec-headless` or `default-sec-desktop`
+2. `nix develop .#windows-ad`
+3. execute with `offensive` identity profile
+
+### Internal lab
+1. `sudo nixos-rebuild switch --flake .#default-lab-host`
+2. start VMs on lab bridges
+3. snapshot before attack simulation
+
+### Reverse
+1. `nix develop .#reverse`
+2. analyze binaries in isolation
+3. create PoC in `nix develop .#exploit-dev`
+
+## 10. Maintenance & best practices
+
+- Run regularly:
+  ```bash
+  nix flake check
+  nix run .#secrets-guard
+  ```
+- Add features through dedicated modules, not ad-hoc blocks in `flake.nix`.
+- Prefer small explicit modules over monolithic generic ones.
+- Review periodically:
+  - whether native tools are still justified,
+  - whether firewall rules are still required,
+  - whether obsolete shells can be removed.
+
+💡 Best practices:
+- use `build` before `switch`,
+- rollback quickly on failure,
+- document every new module/devShell when introduced.
+
+## 11. Customization
 
 - Add a host: create `hosts/<name>/` and register it in `flake.nix`.
 - Add a user: create `users/<name>/default.nix` and reference it from host settings.
+- Add or tune a security profile: adjust profile composition in `flake.nix` (`default-sec-desktop`, `default-sec-headless`, `default-lab-host`).
 - Add system packages/features: update the relevant module in `modules/`.
 - Add user tools/config: update `modules/home-manager/`.
+- Customize keybindings/window behavior: edit `modules/home-manager/desktop-user/hyprland.nix`.
+- Customize network/firewall policy: edit `modules/network/default.nix` and profile values in `flake.nix`.
+- Customize OPSEC defaults (identity, DNS, VPN, logging): edit `modules/opsec/default.nix`.
+- Customize secrets mapping (SOPS keys/files): edit `modules/security/secrets-sops.nix` and `secrets/*.yaml`.
+- Add or modify a devShell: edit `devshells/<name>/default.nix` and export it in `flake.nix`.
+- Customize lab virtualization/networks: edit `modules/virtualization/lab.nix`.

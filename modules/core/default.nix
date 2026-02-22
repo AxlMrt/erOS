@@ -3,6 +3,5 @@
   imports = [
     ./fonts.nix
     ./system.nix
-    ./networking.nix
   ];
 }
