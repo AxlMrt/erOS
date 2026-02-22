@@ -11,12 +11,12 @@ This directory contains encrypted secrets managed by `sops-nix`.
 
 ### offensive.yaml
 
-- `vpn.wireguard.config`
-- `vpn.openvpn.client_config`
+- `vpn/wireguard/config`
+- `vpn/openvpn/client_config`
 
 ### lab.yaml
 
-- `vpn.wireguard.config`
+- `vpn/wireguard/config`
 
 ## Bootstrap
 
@@ -43,4 +43,16 @@ Alternative (in-place) encryption:
 - Run: `nix run .#secrets-guard`
 - The `rebuild` alias now executes this check before `nixos-rebuild`.
 
-Never commit plaintext secrets.
+## Security Best Practices
+
+**Safe to commit**:
+- `offensive.yaml` and `lab.yaml` (encrypted with SOPS)
+- `.sops.yaml` (contains only public keys)
+- This README and `.gitignore`
+
+**Never commit**:
+- `/var/lib/sops-nix/key.txt` (private age key)
+- `*.local.yaml` files (plaintext versions)
+- Any unencrypted secrets
+
+Encrypted files can only be decrypted by machines with the private key.

@@ -69,7 +69,7 @@
               return 1
             fi
 
-            if ! grep -q 'ENC\\[' "$file"; then
+            if ! grep -q 'ENC\[' "$file"; then
               echo "[secrets-guard] encrypted payload marker not found: $file" >&2
               return 1
             fi
@@ -102,13 +102,13 @@
             };
             security.secrets.declarations = {
               wgConfig = {
-                key = "vpn.wireguard.config";
+                key = "vpn/wireguard/config";
                 owner = "root";
                 group = "root";
                 mode = "0400";
               };
               openvpnClientConfig = {
-                key = "vpn.openvpn.client_config";
+                key = "vpn/openvpn/client_config";
                 owner = "root";
                 group = "root";
                 mode = "0400";
@@ -147,13 +147,13 @@
             };
             security.secrets.declarations = {
               wgConfig = {
-                key = "vpn.wireguard.config";
+                key = "vpn/wireguard/config";
                 owner = "root";
                 group = "root";
                 mode = "0400";
               };
               openvpnClientConfig = {
-                key = "vpn.openvpn.client_config";
+                key = "vpn/openvpn/client_config";
                 owner = "root";
                 group = "root";
                 mode = "0400";
@@ -193,7 +193,7 @@
             };
             security.secrets.declarations = {
               wgConfig = {
-                key = "vpn.wireguard.config";
+                key = "vpn/wireguard/config";
                 owner = "root";
                 group = "root";
                 mode = "0400";
