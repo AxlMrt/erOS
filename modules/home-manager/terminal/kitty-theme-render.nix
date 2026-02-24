@@ -1,27 +1,27 @@
 {}: theme: let
   c = theme.palette;
 in ''
-  foreground ${c.fg}
-  background ${c.bg}
-  selection_foreground ${c.bg}
+  foreground ${c."text-primary"}
+  background ${c.background}
+  selection_foreground ${c."text-on-accent"}
   selection_background ${c.accent}
-  cursor ${c.fg}
-  cursor_text_color ${c.bg}
+  cursor ${c."text-primary"}
+  cursor_text_color ${c.background}
 
-  color0 ${c.bgAlt}
-  color8 ${c.border}
+  color0 ${c."surface-alt"}
+  color8 ${c."text-disabled"}
   color1 ${c.error}
-  color9 ${c.warn}
-  color2 ${c.ok}
-  color10 ${c.ok}
-  color3 ${c.warn}
-  color11 ${c.warn}
+  color9 ${c.error}
+  color2 ${c.success}
+  color10 ${c.success}
+  color3 ${c.warning}
+  color11 ${c.warning}
   color4 ${c.accent}
-  color12 ${c.fgMuted}
-  color5 ${c.fgMuted}
-  color13 ${c.accent}
-  color6 ${c.accent}
-  color14 ${c.fg}
-  color7 ${c.fg}
-  color15 ${c.fgMuted}
+  color12 ${c."accent-hover"}
+  color5 ${c.info}
+  color13 ${c."accent-muted"}
+  color6 ${c.info}
+  color14 ${c."text-secondary"}
+  color7 ${c."text-primary"}
+  color15 ${c."text-primary"}
 ''

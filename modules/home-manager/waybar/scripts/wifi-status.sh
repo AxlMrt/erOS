@@ -6,7 +6,7 @@ if [ -f "$theme_env" ]; then
   . "$theme_env"
 fi
 
-error_color="${EROS_COLOR_ERROR:-#bf616a}"
+error_color="${EROS_COLOR_ERROR}"
 
 # This script gathers detailed Wi-Fi connection information.
 # It collects the following fields:

@@ -5,6 +5,12 @@
       "$mod" = "SUPER";
       monitor = ",preferred,auto,1";
 
+      env = [
+        "XCURSOR_THEME,${config.eros.theme.active.cursor.name}"
+        "XCURSOR_SIZE,${toString config.eros.theme.active.cursor.size}"
+        "HYPRCURSOR_SIZE,${toString config.eros.theme.active.cursor.size}"
+      ];
+
       exec-once = [
         "/etc/profiles/per-user/${config.home.username}/bin/eros-themectl init"
         "swaync"

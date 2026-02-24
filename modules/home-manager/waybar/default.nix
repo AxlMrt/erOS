@@ -39,47 +39,36 @@ in {
         exclusive = true;
         passthrough = false;
         position = "top";
-        spacing = 3;
+        spacing = 0;
         "fixed-center" = true;
         ipc = true;
         reload_style_on_change = true;
         "on-sigusr2" = "reload";
-        "margin-top" = 4;
+        "margin-top" = 8;
         "margin-left" = 8;
         "margin-right" = 8;
 
         modules-left = [
           "custom/theme_switch"
-          "custom/separator#blank"
           "custom/wallpaper_switch"
-          "custom/separator#blank"
           "custom/menu"
-          "custom/separator#blank"
           "custom/playerctl"
-          "custom/separator#blank"
           "hyprland/window"
         ];
 
         modules-center = [
           "hyprland/workspaces#rw"
           "clock"
-          "custom/separator#blank"
           "idle_inhibitor"
         ];
 
         modules-right = [
           "group/app_drawer"
-          "custom/separator#blank"
           "group/notify"
-          "custom/separator#blank"
           "tray"
-          "custom/separator#blank"
           "group/laptop"
-          "custom/separator#blank"
           "group/mobo_drawer"
-          "custom/separator#blank"
           "group/audio"
-          "custom/separator#blank"
           "group/status"
         ];
 
@@ -275,16 +264,10 @@ in {
           tooltip = true;
         };
 
-        "custom/separator#blank" = {
-          format = " ";
-          interval = "once";
-          tooltip = false;
-        };
-
         clock = {
           interval = 1;
-          format = " {:%H:%M}";
-          "format-alt" = " {:%H:%M   %Y-%m-%d}";
+          format = "  {:%H:%M}";
+          "format-alt" = "  {:%H:%M  %Y-%m-%d}";
           "tooltip-format" = "<tt><small>{calendar}</small></tt>";
           calendar = {
             mode = "year";
@@ -329,7 +312,7 @@ in {
 
         backlight = {
           interval = 2;
-          format = "{icon} {percent}%";
+          format = "{icon}  {percent}%";
           "format-icons" = ["" "" "" "󰃝" "󰃞" "󰃟" "󰃠"];
           "on-scroll-up" = "$HOME/.config/waybar/scripts/brightness-control.sh -o i";
           "on-scroll-down" = "$HOME/.config/waybar/scripts/brightness-control.sh -o d";
@@ -401,8 +384,8 @@ in {
         };
 
         tray = {
-          "icon-size" = 18;
-          spacing = 4;
+          "icon-size" = 17;
+          spacing = 8;
         };
       }
     ];

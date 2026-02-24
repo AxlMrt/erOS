@@ -6,6 +6,7 @@
     location = "center";
     extraConfig = {
       show = "drun";
+      prompt = "";
       modi = "drun";
       show-icons = true;
       display-drun = "";

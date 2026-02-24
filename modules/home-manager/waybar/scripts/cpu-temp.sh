@@ -1,19 +1,22 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
 theme_env="$HOME/.config/eros/active/theme/colors.env"
 if [ -f "$theme_env" ]; then
   # shellcheck disable=SC1090
   . "$theme_env"
 fi
 
-error_color="${EROS_COLOR_ERROR:-#bf616a}"
+error_color="${EROS_COLOR_ERROR}"
 
 model=$(awk -F ': ' '/model name/{print $2}' /proc/cpuinfo | head -n 1 | sed 's/@.*//; s/ *\((R)\|(TM)\)//g; s/^[ \t]*//; s/[ \t]*$//')
 
 # get CPU clock speeds
 get_cpu_frequency() {
   freqlist=$(awk '/cpu MHz/ {print $4}' /proc/cpuinfo)
-  maxfreq=$(sed 's/...$//' /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq)
+  maxfreq=$(cat /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq 2>/dev/null || true)
+  maxfreq=${maxfreq%???}
   if [ -z "$freqlist" ] || [ -z "$maxfreq" ]; then
     echo "--"
     return
@@ -24,6 +27,11 @@ get_cpu_frequency() {
 
 # get CPU temp
 get_cpu_temperature() {
+  if ! command -v sensors >/dev/null 2>&1; then
+    echo "-- --"
+    return
+  fi
+
   temp=$(sensors | awk '/Package id 0/ {print $4}' | awk -F '[+.]' '{print $2}')
   if [[ -z "$temp" ]]; then
     temp=$(sensors | awk '/Tctl/ {print $2}' | tr -d '+°C')

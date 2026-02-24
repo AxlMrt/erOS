@@ -6,16 +6,24 @@
   defaultWallpaper = null;
 
   palette = {
-    bg = "#eff1f5";
-    bgAlt = "#e6e9ef";
-    surface = "#ccd0da";
+    background = "#eff1f5";
+    surface = "#dce0e8";
+    "surface-alt" = "#e6e9ef";
+    "surface-elevated" = "#ffffff";
     border = "#bcc0cc";
-    fg = "#4c4f69";
-    fgMuted = "#6c6f85";
     accent = "#1e66f5";
-    ok = "#40a02b";
-    warn = "#df8e1d";
+    "accent-hover" = "#1a5ad7";
+    "accent-muted" = "#7287fd";
+    "accent-subtle" = "#ccd7ff";
+    success = "#40a02b";
+    warning = "#df8e1d";
     error = "#d20f39";
+    info = "#04a5e5";
+    "text-primary" = "#4c4f69";
+    "text-secondary" = "#5c5f77";
+    "text-muted" = "#6c6f85";
+    "text-on-accent" = "#ffffff";
+    "text-disabled" = "#8c8fa1";
   };
 
   fonts = {
@@ -25,8 +33,8 @@
   };
 
   cursor = {
-    name = "Bibata-Modern-Classic";
-    size = 24;
+    name = "Nordzy-catppuccin-latte-blue";
+    size = 20;
   };
 
   gtk = {

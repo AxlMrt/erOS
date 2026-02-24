@@ -39,7 +39,7 @@
     };
     cursor = {
       name = theme.cursor.name or "Bibata-Modern-Classic";
-      size = theme.cursor.size or 24;
+      size = theme.cursor.size or 20;
     };
     gtk = {
       theme = theme.gtk.theme or "Adwaita";
@@ -50,10 +50,10 @@
       style = theme.qt.style or "Adwaita-Dark";
     };
     terminal = {
-      opacity = theme.terminal.opacity or 0.84;
+      opacity = theme.terminal.opacity or 0.85;
     };
     waybar = {
-      opacity = theme.waybar.opacity or 0.82;
+      opacity = theme.waybar.opacity or 0.85;
     };
     vscode = {
       theme = theme.vscode.theme or "Default Dark Modern";
@@ -65,10 +65,56 @@
       else if allWallpapers == []
       then null
       else builtins.head allWallpapers;
+    palette = let
+      p = theme.palette;
+      background = p.background or "#111111";
+      surface = p.surface or background;
+      surfaceAlt = p."surface-alt" or surface;
+      surfaceElevated = p."surface-elevated" or surfaceAlt;
+      border = p.border or surface;
+      accent = p.accent or "#3b82f6";
+      accentHover = p."accent-hover" or accent;
+      accentMuted = p."accent-muted" or accent;
+      accentSubtle = p."accent-subtle" or surfaceAlt;
+      success = p.success or "#22c55e";
+      warning = p.warning or "#f59e0b";
+      error = p.error or "#ef4444";
+      info = p.info or accent;
+      textPrimary = p."text-primary" or "#f5f5f5";
+      textSecondary = p."text-secondary" or textPrimary;
+      textMuted = p."text-muted" or textSecondary;
+      textOnAccent = p."text-on-accent" or "#ffffff";
+      textDisabled = p."text-disabled" or textMuted;
+    in
+      p
+      // {
+        background = background;
+        surface = surface;
+        "surface-alt" = surfaceAlt;
+        "surface-elevated" = surfaceElevated;
+        border = border;
+        accent = accent;
+        "accent-hover" = accentHover;
+        "accent-muted" = accentMuted;
+        "accent-subtle" = accentSubtle;
+        success = success;
+        warning = warning;
+        error = error;
+        info = info;
+        "text-primary" = textPrimary;
+        "text-secondary" = textSecondary;
+        "text-muted" = textMuted;
+        "text-on-accent" = textOnAccent;
+        "text-disabled" = textDisabled;
+      };
   in
     theme
     // {
-      inherit fonts cursor gtk qt terminal waybar vscode defaultWallpaper;
+      inherit fonts cursor gtk qt terminal waybar vscode defaultWallpaper palette;
+      ui = {
+        spacing = spacingScale;
+        radius = radiusScale;
+      };
       wallpapers = allWallpapers;
       wallpaper =
         if defaultWallpaper == null
@@ -77,8 +123,22 @@
     })
   mergedThemes;
 
-  selectedTheme = withCompatPalette.${config.eros.theme.variant};
-  themeNames = builtins.attrNames withCompatPalette;
+  selectedTheme = resolvedThemes.${config.eros.theme.variant};
+  themeNames = builtins.attrNames resolvedThemes;
+
+  spacingScale = {
+    xs = config.eros.ui.spacing.base;
+    sm = config.eros.ui.spacing.base * 2;
+    md = config.eros.ui.spacing.base * 3;
+    lg = config.eros.ui.spacing.base * 4;
+    xl = config.eros.ui.spacing.base * 5;
+  };
+
+  radiusScale = {
+    sm = config.eros.ui.spacing.base;
+    md = config.eros.ui.spacing.base * 2;
+    lg = config.eros.ui.spacing.base * 3;
+  };
 
   wallpaperListText = theme:
     if theme.wallpapers == []
@@ -95,16 +155,24 @@
   mkColorEnv = theme: let
     c = theme.palette;
   in ''
-    export EROS_COLOR_BG='${c.bg}'
-    export EROS_COLOR_BG_ALT='${c.bgAlt}'
+    export EROS_COLOR_BACKGROUND='${c.background}'
     export EROS_COLOR_SURFACE='${c.surface}'
+    export EROS_COLOR_SURFACE_ALT='${c."surface-alt"}'
+    export EROS_COLOR_SURFACE_ELEVATED='${c."surface-elevated"}'
     export EROS_COLOR_BORDER='${c.border}'
-    export EROS_COLOR_FG='${c.fg}'
-    export EROS_COLOR_FG_MUTED='${c.fgMuted}'
     export EROS_COLOR_ACCENT='${c.accent}'
-    export EROS_COLOR_OK='${c.ok}'
-    export EROS_COLOR_WARN='${c.warn}'
+    export EROS_COLOR_ACCENT_HOVER='${c."accent-hover"}'
+    export EROS_COLOR_ACCENT_MUTED='${c."accent-muted"}'
+    export EROS_COLOR_ACCENT_SUBTLE='${c."accent-subtle"}'
+    export EROS_COLOR_SUCCESS='${c.success}'
+    export EROS_COLOR_WARNING='${c.warning}'
     export EROS_COLOR_ERROR='${c.error}'
+    export EROS_COLOR_INFO='${c.info}'
+    export EROS_COLOR_TEXT_PRIMARY='${c."text-primary"}'
+    export EROS_COLOR_TEXT_SECONDARY='${c."text-secondary"}'
+    export EROS_COLOR_TEXT_MUTED='${c."text-muted"}'
+    export EROS_COLOR_TEXT_ON_ACCENT='${c."text-on-accent"}'
+    export EROS_COLOR_TEXT_DISABLED='${c."text-disabled"}'
   '';
 
   mkSettingsEnv = theme: ''
@@ -159,44 +227,9 @@
       EOF
     '';
 
-  themeArtifacts = mapAttrs mkThemeArtifacts withCompatPalette;
-
+  themeArtifacts = mapAttrs mkThemeArtifacts resolvedThemes;
   themeListText = lib.concatStringsSep "\n" themeNames + "\n";
   themeListFile = pkgs.writeText "eros-themes.txt" themeListText;
-
-  withCompatPalette = mapAttrs (_name: theme: let
-    p = theme.palette;
-  in
-    theme
-    // {
-      palette =
-        p
-        // {
-          base = p.bg;
-          mantle = p.bgAlt;
-          crust = p.bg;
-          surface0 = p.surface;
-          surface1 = p.surface;
-          surface2 = p.border;
-          overlay0 = p.border;
-          overlay1 = p.fgMuted;
-          overlay2 = p.fgMuted;
-          text = p.fg;
-          subtext0 = p.fgMuted;
-          subtext1 = p.fgMuted;
-          blue = p.accent;
-          green = p.ok;
-          yellow = p.warn;
-          red = p.error;
-          rosewater = p.fg;
-          lavender = p.accent;
-          mauve = p.accent;
-          teal = p.accent;
-          peach = p.warn;
-          pink = p.accent;
-        };
-    })
-  resolvedThemes;
 
   themePathCases = lib.concatMapStringsSep "\n" (name: "    ${name}) echo ${lib.escapeShellArg (toString themeArtifacts.${name})} ;;") themeNames;
 
@@ -229,7 +262,7 @@ in {
 
       radius = mkOption {
         type = types.int;
-        default = 6;
+        default = 8;
         description = "Global corner radius token.";
       };
 
@@ -237,6 +270,12 @@ in {
         type = types.int;
         default = 8;
         description = "Global spacing token in px.";
+      };
+
+      spacing.base = mkOption {
+        type = types.int;
+        default = 8;
+        description = "Base spacing unit in px for all UI spacing scales.";
       };
 
       fonts = {
@@ -343,13 +382,13 @@ in {
 
       registry = mkOption {
         type = types.attrsOf types.anything;
-        default = withCompatPalette;
+        default = resolvedThemes;
         readOnly = true;
       };
 
       active = mkOption {
         type = types.attrsOf types.anything;
-        default = withCompatPalette.${config.eros.theme.variant};
+        default = resolvedThemes.${config.eros.theme.variant};
         readOnly = true;
       };
 
@@ -364,7 +403,7 @@ in {
   config = mkIf config.eros.theme.enable {
     assertions = [
       {
-        assertion = builtins.hasAttr config.eros.theme.variant withCompatPalette;
+        assertion = builtins.hasAttr config.eros.theme.variant resolvedThemes;
         message = "eros.theme.variant='${config.eros.theme.variant}' is undefined.";
       }
     ];
@@ -373,6 +412,8 @@ in {
 
     home.packages = [
       themectl
+      pkgs.nordzy-cursor-theme
+      pkgs.bibata-cursors
     ];
 
     home.activation.erosThemeInit = lib.hm.dag.entryAfter ["writeBoundary"] ''
@@ -381,6 +422,7 @@ in {
 
     home.sessionVariables = {
       EROS_UI_DENSITY = config.eros.ui.density;
+      EROS_UI_SPACING_BASE = toString config.eros.ui.spacing.base;
       EROS_THEME_VARIANT = config.eros.theme.variant;
       EROS_THEME_ACTIVE_DIR = "$HOME/.config/eros/active/theme";
       GTK_THEME = selectedTheme.gtk.theme;
