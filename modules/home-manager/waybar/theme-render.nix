@@ -14,6 +14,7 @@
       md = config.eros.ui.spacing.base * 2;
       lg = config.eros.ui.spacing.base * 3;
     };
+  vPad = 4;
 in ''
   * {
     font-family: "${theme.fonts.ui}", "${theme.fonts.mono}";
@@ -31,7 +32,7 @@ in ''
   .modules-center,
   .modules-right {
     margin: ${toString spacing.xs}px 0 0;
-    padding: ${toString spacing.xs}px;
+    padding: ${toString vPad}px ${toString spacing.xs}px;
     border-radius: ${toString radius.md}px;
     border: 1px solid ${c.border};
     background: alpha(${c."surface-elevated"}, ${toString (theme.waybar.opacity or 0.85)});
@@ -67,7 +68,7 @@ in ''
   #custom-theme_switch,
   #custom-wallpaper_switch {
     margin: 0;
-    padding: ${toString spacing.xs}px;
+    padding: ${toString vPad}px ${toString spacing.xs}px;
     border-radius: ${toString radius.sm}px;
     border: 1px solid transparent;
     color: ${c."text-secondary"};
@@ -146,7 +147,7 @@ in ''
     box-shadow: none;
     text-shadow: none;
     margin: 0;
-    padding: ${toString spacing.xs}px;
+    padding: ${toString vPad}px ${toString spacing.xs}px;
     border-radius: ${toString radius.sm}px;
     border: 1px solid transparent;
     color: ${c."text-secondary"};
@@ -208,6 +209,6 @@ in ''
     border: 1px solid ${c.border};
     background: ${c."surface-elevated"};
     color: ${c."text-primary"};
-    padding: ${toString spacing.xs}px;
+    padding: ${toString vPad}px ${toString spacing.xs}px;
   }
 ''
