@@ -6,7 +6,7 @@
 }: {
   networking.hostName = hostname;
   networking.hosts = {
-    "10.129.3.65" = ["facts.htb"];
+    "10.129.6.40" = ["2million.htb"];
   };
   nixpkgs.config.allowUnfree = true;
 

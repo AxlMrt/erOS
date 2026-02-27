@@ -8,11 +8,15 @@
   tcpByProfile = {
     trusted = [22 80 443];
     untrusted = [22];
+    engagement = [22];
+    isolated-offensive = [];
     lab = [22 5900 3389];
   };
   udpByProfile = {
     trusted = [];
     untrusted = [];
+    engagement = [];
+    isolated-offensive = [];
     lab = [53 67 68];
   };
 
@@ -79,6 +83,8 @@ in {
       type = lib.types.enum [
         "trusted"
         "untrusted"
+        "engagement"
+        "isolated-offensive"
         "lab"
       ];
       default = "untrusted";

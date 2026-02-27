@@ -25,15 +25,4 @@
     pkgs.xdg-desktop-portal-hyprland
     pkgs.xdg-desktop-portal-gtk
   ];
-
-  environment.systemPackages = with pkgs; [
-    brightnessctl
-    grim
-    kitty
-    rofi
-    swww
-    slurp
-    waybar
-    wl-clipboard
-  ];
 }

@@ -20,12 +20,11 @@ Operational goals:
 ### Components
 
 - `flake.nix`: entry point, profiles, outputs, and devShell exports.
-- `modules/core`: base system configuration.
+- `modules/core`: base system configuration (system, packages, fonts, Hyprland).
 - `modules/security`: hardening (sudo, ssh, sysctl).
 - `modules/security/secrets-sops.nix`: encrypted secret handling with SOPS.
 - `modules/network`: firewall policy + temporary port management (`eros-portctl`).
 - `modules/opsec`: identity profile, DNS hygiene, VPN policy, and logging.
-- `modules/offensive/native`: strict minimal native toolset.
 - `modules/virtualization`: KVM/libvirt lab setup.
 - `modules/home-manager`: user layer (shell, UI, desktop tools).
 
@@ -104,17 +103,25 @@ nix develop .#web-pentest
 nix develop .#windows-ad
 nix develop .#reverse
 nix develop .#exploit-dev
+nix develop .#cloud-pentest
+nix develop .#mobile
+nix develop .#mobile-ios
+nix develop .#hardware
 ```
 
 ### Available devShells
 
 - `web-pentest`: web application testing.
 - `network-pentest`: network/protocol assessment.
-- `windows-ad`: AD and Windows protocol operations.
-- `malware-analysis`: baseline static malware analysis tooling.
+- `windows-ad`: full AD and Windows protocol operations (baseline + advanced optional tooling).
+- `malware-analysis`: full malware analysis baseline (static + dynamic instrumentation essentials).
 - `osint`: open-source intelligence tooling.
 - `reverse`: reverse engineering workflows.
 - `exploit-dev`: exploit build/debug workflow.
+- `cloud-pentest`: multi-cloud offensive and audit tooling baseline.
+- `mobile`: Android-focused mobile assessment baseline.
+- `mobile-ios`: iOS-focused mobile assessment baseline.
+- `hardware`: firmware and hardware security baseline.
 
 ### Create a new devShell
 
@@ -132,7 +139,12 @@ nix develop .#exploit-dev
 
 ### Native tools
 
-Managed by `modules/offensive/native` for low-risk daily usage (for example `nmap`, `tcpdump`, `curl`).
+Managed centrally in `modules/core/packages.nix`, with package groups separated by type:
+- core system baseline,
+- archive utilities,
+- infrastructure helpers,
+- native pentest network baseline,
+- desktop-only package set (enabled with Hyprland).
 
 ### Isolated tools
 
@@ -151,7 +163,7 @@ Placed in devShells for:
 
 ## 6. Network & port management
 
-Firewall policy is profile-driven (`trusted`, `untrusted`, `lab`) through `modules/network`.
+Firewall policy is profile-driven (`trusted`, `untrusted`, `engagement`, `isolated-offensive`, `lab`) through `modules/network`.
 
 ### Temporary port opening
 
@@ -168,6 +180,8 @@ Ports are auto-closed when TTL expires.
 ### Network profiles
 
 - `untrusted`: default offensive profile.
+- `engagement`: low-exposure profile for live customer operations.
+- `isolated-offensive`: zero-open-port profile for hardened travel/offline contexts.
 - `lab`: profile for isolated lab network workflows.
 - `trusted`: controlled exposure profile.
 
@@ -245,6 +259,8 @@ nix run .#secrets-guard
   ```bash
   nix flake check
   nix run .#secrets-guard
+  nix run .#shell-health
+  nix run .#qa-check
   ```
 - Add features through dedicated modules, not ad-hoc blocks in `flake.nix`.
 - Prefer small explicit modules over monolithic generic ones.
@@ -265,6 +281,7 @@ nix run .#secrets-guard
 - Add or tune a security profile: adjust profile composition in `flake.nix` (`default-sec-desktop`, `default-sec-headless`, `default-lab-host`).
 - Add system packages/features: update the relevant module in `modules/`.
 - Add user tools/config: update `modules/home-manager/`.
+- Customize Hyprland system integration: edit `modules/core/hyprland.nix`.
 - Customize keybindings/window behavior: edit `modules/home-manager/desktop-user/hyprland.nix`.
 - Customize network/firewall policy: edit `modules/network/default.nix` and profile values in `flake.nix`.
 - Customize OPSEC defaults (identity, DNS, VPN, logging): edit `modules/opsec/default.nix`.

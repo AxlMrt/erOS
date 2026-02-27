@@ -82,6 +82,84 @@
         '';
       };
 
+    shellHealthFor = system: let
+      pkgs = pkgsFor system;
+      flakePath = toString ./.;
+    in
+      pkgs.writeShellApplication {
+        name = "eros-shell-health";
+        runtimeInputs = with pkgs; [coreutils nix];
+        text = ''
+          set -euo pipefail
+
+          mode="''${1:-resolve}"
+          shells=(
+            web-pentest
+            network-pentest
+            windows-ad
+            malware-analysis
+            osint
+            reverse
+            exploit-dev
+            cloud-pentest
+            mobile
+            mobile-ios
+            hardware
+          )
+
+          echo "[shell-health] mode=$mode system=${system}"
+
+          for shell in "''${shells[@]}"; do
+            case "$mode" in
+              resolve)
+                nix eval "${flakePath}#devShells.${system}.''${shell}.name" >/dev/null
+                ;;
+              build)
+                nix develop "${flakePath}#''${shell}" -c true >/dev/null
+                ;;
+              *)
+                echo "Usage: eros-shell-health [resolve|build]" >&2
+                exit 1
+                ;;
+            esac
+            echo "[shell-health] ok: ''${shell}"
+          done
+
+          echo "[shell-health] all checks passed"
+        '';
+      };
+
+    qaCheckFor = system: let
+      pkgs = pkgsFor system;
+      flakePath = toString ./.;
+    in
+      pkgs.writeShellApplication {
+        name = "eros-qa-check";
+        runtimeInputs = with pkgs; [nix];
+        text = ''
+          set -euo pipefail
+
+          mode="''${1:-fast}"
+
+          echo "[qa-check] mode=$mode"
+          echo "[qa-check] running nix flake check"
+          nix flake check "${flakePath}"
+
+          echo "[qa-check] running shell-health resolve"
+          nix run "${flakePath}#shell-health" -- resolve
+
+          if [[ "$mode" == "full" ]]; then
+            echo "[qa-check] running secrets-guard"
+            nix run "${flakePath}#secrets-guard"
+          elif [[ "$mode" != "fast" ]]; then
+            echo "Usage: eros-qa-check [fast|full]" >&2
+            exit 1
+          fi
+
+          echo "[qa-check] all checks passed"
+        '';
+      };
+
     modernProfileModules = {
       sec-desktop = [
         ./modules/core
@@ -89,8 +167,7 @@
         ./modules/security/secrets-sops.nix
         ./modules/network
         ./modules/opsec
-        ./modules/offensive/native
-        ./modules/desktop-system
+        ./modules/core/hyprland.nix
         ({config, ...}: {
           eros = {
             security.hardening.enable = true;
@@ -124,7 +201,6 @@
             opsec.vpn.autoConnect.enable = true;
             opsec.vpn.openvpnConfigFile = config.sops.secrets.openvpnClientConfig.path;
             opsec.vpn.wireguardConfigFile = config.sops.secrets.wgConfig.path;
-            offensive.native.enable = true;
           };
         })
       ];
@@ -135,7 +211,6 @@
         ./modules/security/secrets-sops.nix
         ./modules/network
         ./modules/opsec
-        ./modules/offensive/native
         ({config, ...}: {
           eros = {
             security.hardening.enable = true;
@@ -169,7 +244,6 @@
             opsec.vpn.autoConnect.enable = true;
             opsec.vpn.openvpnConfigFile = config.sops.secrets.openvpnClientConfig.path;
             opsec.vpn.wireguardConfigFile = config.sops.secrets.wgConfig.path;
-            offensive.native.enable = true;
           };
         })
       ];
@@ -180,7 +254,6 @@
         ./modules/security/secrets-sops.nix
         ./modules/network
         ./modules/opsec
-        ./modules/offensive/native
         ./modules/virtualization/lab.nix
         ({config, ...}: {
           eros = {
@@ -208,7 +281,6 @@
             opsec.vpn.provider = "wireguard";
             opsec.vpn.autoConnect.enable = true;
             opsec.vpn.wireguardConfigFile = config.sops.secrets.wgConfig.path;
-            offensive.native.enable = false;
             lab.virtualization.enable = true;
           };
         })
@@ -305,11 +377,25 @@
         exploit-dev = import ./devshells/exploit-dev {
           inherit pkgs;
         };
+        cloud-pentest = import ./devshells/cloud-pentest {
+          inherit pkgs;
+        };
+        mobile = import ./devshells/mobile {
+          inherit pkgs;
+        };
+        mobile-ios = import ./devshells/mobile-ios {
+          inherit pkgs;
+        };
+        hardware = import ./devshells/hardware {
+          inherit pkgs;
+        };
       }
     );
 
     packages = forAllSystems (system: {
       secrets-guard = secretsGuardFor system;
+      shell-health = shellHealthFor system;
+      qa-check = qaCheckFor system;
     });
 
     apps = forAllSystems (system: {
@@ -318,9 +404,19 @@
         program = "${self.packages.${system}.secrets-guard}/bin/eros-secrets-guard";
         meta.description = "Validate that tracked secrets are encrypted and placeholder-free";
       };
+      shell-health = {
+        type = "app";
+        program = "${self.packages.${system}.shell-health}/bin/eros-shell-health";
+        meta.description = "Validate devShell resolution/build health";
+      };
+      qa-check = {
+        type = "app";
+        program = "${self.packages.${system}.qa-check}/bin/eros-qa-check";
+        meta.description = "Run standardized ErOS QA checks";
+      };
       default = self.apps.${system}.secrets-guard;
     });
 
-    formatter.${hosts.${defaultHost}.system} = nixpkgs.legacyPackages.${hosts.${defaultHost}.system}.alejandra;
+    formatter.${hosts.${defaultHost}.system} = (pkgsFor hosts.${defaultHost}.system).alejandra;
   };
 }
