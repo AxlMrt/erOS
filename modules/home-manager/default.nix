@@ -5,9 +5,9 @@
     ./notifications/swaync.nix
     ./launcher/rofi.nix
     ./shell/zsh.nix
-    ./terminal/kitty.nix
+    ./terminal/default.nix
     ./editors/default.nix
-    ./browers/firefox.nix
+    ./browers/default.nix
     ./waybar/default.nix
     ./desktop-user/hyprland.nix
   ];
