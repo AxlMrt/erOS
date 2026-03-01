@@ -56,6 +56,7 @@
         "$mod, J, movefocus, d"
         "$mod, K, movefocus, u"
         "$mod, L, movefocus, r"
+        "$mod, O, exec, obsidian"
       ];
 
       bindm = [

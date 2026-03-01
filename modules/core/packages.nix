@@ -11,6 +11,7 @@
     git # Source control and workflow baseline
     jq # JSON filtering for tooling pipelines
     killall # Fast process cleanup during testing
+    obsidian # Note-taking and knowledge management
     ripgrep # Fast recursive search for code and artifacts
     tmux # Long-running session management
     vim # Emergency editor available everywhere
