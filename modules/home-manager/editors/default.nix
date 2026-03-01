@@ -1,7 +1,7 @@
 {...}: {
   imports = [
     ./nano.nix
-    ./neovim.nix
+    ./nvf.nix
     ./vim.nix
     ./vscode.nix
   ];
