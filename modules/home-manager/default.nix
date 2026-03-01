@@ -7,6 +7,7 @@
     ./shell/zsh.nix
     ./terminal/kitty.nix
     ./editors/default.nix
+    ./browers/firefox.nix
     ./waybar/default.nix
     ./desktop-user/hyprland.nix
   ];
