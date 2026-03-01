@@ -28,12 +28,7 @@
 
   dnsServers = dnsByProfile.${config.eros.opsec.dnsProfile} or [];
 
-  vpnPackages =
-    if config.eros.opsec.vpn.provider == "wireguard"
-    then [pkgs.wireguard-tools]
-    else if config.eros.opsec.vpn.provider == "openvpn"
-    then [pkgs.openvpn pkgs.networkmanager-openvpn]
-    else [pkgs.openvpn pkgs.wireguard-tools pkgs.networkmanager-openvpn];
+  vpnPackages = [pkgs.openvpn pkgs.networkmanager-openvpn];
 in {
   options.eros.opsec = {
     enable = lib.mkEnableOption "opsec defaults and identity segregation";
@@ -62,12 +57,8 @@ in {
     macSpoof.enable = lib.mkEnableOption "MAC randomization defaults for NetworkManager";
 
     vpn.provider = lib.mkOption {
-      type = lib.types.enum [
-        "auto"
-        "wireguard"
-        "openvpn"
-      ];
-      default = "auto";
+      type = lib.types.enum ["openvpn"];
+      default = "openvpn";
       description = "VPN client stack policy for offensive contexts.";
     };
 
@@ -75,12 +66,6 @@ in {
       type = lib.types.nullOr lib.types.str;
       default = null;
       description = "Path to OpenVPN client config (typically from sops secret path).";
-    };
-
-    vpn.wireguardConfigFile = lib.mkOption {
-      type = lib.types.nullOr lib.types.str;
-      default = null;
-      description = "Path to WireGuard config file (typically from sops secret path).";
     };
 
     vpn.autoConnect.enable = lib.mkEnableOption "automatic VPN connection with systemd";
@@ -106,12 +91,6 @@ in {
           || config.eros.opsec.vpn.openvpnConfigFile != null;
         message = "eros.opsec.vpn.openvpnConfigFile must be set when VPN autoconnect is enabled with openvpn provider.";
       }
-      {
-        assertion =
-          !(config.eros.opsec.vpn.autoConnect.enable && config.eros.opsec.vpn.provider == "wireguard")
-          || config.eros.opsec.vpn.wireguardConfigFile != null;
-        message = "eros.opsec.vpn.wireguardConfigFile must be set when VPN autoconnect is enabled with wireguard provider.";
-      }
     ];
 
     networking.hostName = lib.mkDefault identityHostnameByProfile.${config.eros.opsec.identityProfile};
@@ -135,46 +114,27 @@ in {
 
     environment.systemPackages = vpnPackages;
 
-    environment.sessionVariables =
-      lib.optionalAttrs (config.eros.opsec.vpn.openvpnConfigFile != null) {
-        EROS_OPENVPN_CONFIG_FILE = config.eros.opsec.vpn.openvpnConfigFile;
-      }
-      // lib.optionalAttrs (config.eros.opsec.vpn.wireguardConfigFile != null) {
-        EROS_WG_CONFIG_FILE = config.eros.opsec.vpn.wireguardConfigFile;
-      };
+    environment.sessionVariables = lib.optionalAttrs (config.eros.opsec.vpn.openvpnConfigFile != null) {
+      EROS_OPENVPN_CONFIG_FILE = config.eros.opsec.vpn.openvpnConfigFile;
+    };
 
-    systemd.services =
-      lib.optionalAttrs (config.eros.opsec.vpn.autoConnect.enable && config.eros.opsec.vpn.provider == "openvpn") {
-        "${config.eros.opsec.vpn.autoConnect.unitName}-openvpn" = {
-          description = "ErOS OpenVPN autoconnect";
-          wantedBy = ["multi-user.target"];
-          after = ["network-online.target"];
-          wants = ["network-online.target"];
-          serviceConfig = {
-            Type = "forking";
-            RuntimeDirectory = "eros-openvpn";
-            PIDFile = "/run/eros-openvpn/openvpn.pid";
-            ExecStart = "${pkgs.openvpn}/bin/openvpn --config ${config.eros.opsec.vpn.openvpnConfigFile} --auth-nocache --daemon --writepid /run/eros-openvpn/openvpn.pid";
-            ExecStop = "${pkgs.coreutils}/bin/kill -TERM $MAINPID";
-            Restart = "on-failure";
-            RestartSec = 3;
-          };
-        };
-      }
-      // lib.optionalAttrs (config.eros.opsec.vpn.autoConnect.enable && config.eros.opsec.vpn.provider == "wireguard") {
-        "${config.eros.opsec.vpn.autoConnect.unitName}-wireguard" = {
-          description = "ErOS WireGuard autoconnect";
-          wantedBy = ["multi-user.target"];
-          after = ["network-online.target"];
-          wants = ["network-online.target"];
-          serviceConfig = {
-            Type = "oneshot";
-            RemainAfterExit = true;
-            ExecStart = "${pkgs.wireguard-tools}/bin/wg-quick up ${config.eros.opsec.vpn.wireguardConfigFile}";
-            ExecStop = "${pkgs.wireguard-tools}/bin/wg-quick down ${config.eros.opsec.vpn.wireguardConfigFile}";
-          };
+    systemd.services = lib.optionalAttrs (config.eros.opsec.vpn.autoConnect.enable && config.eros.opsec.vpn.provider == "openvpn") {
+      "${config.eros.opsec.vpn.autoConnect.unitName}-openvpn" = {
+        description = "ErOS OpenVPN autoconnect";
+        wantedBy = ["multi-user.target"];
+        after = ["network-online.target"];
+        wants = ["network-online.target"];
+        serviceConfig = {
+          Type = "forking";
+          RuntimeDirectory = "eros-openvpn";
+          PIDFile = "/run/eros-openvpn/openvpn.pid";
+          ExecStart = "${pkgs.openvpn}/bin/openvpn --config ${config.eros.opsec.vpn.openvpnConfigFile} --auth-nocache --daemon --writepid /run/eros-openvpn/openvpn.pid";
+          ExecStop = "${pkgs.coreutils}/bin/kill -TERM $MAINPID";
+          Restart = "on-failure";
+          RestartSec = 3;
         };
       };
+    };
 
     services.journald.extraConfig = lib.mkIf config.eros.opsec.logging.minimal.enable ''
       Storage=volatile

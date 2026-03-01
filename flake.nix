@@ -46,6 +46,7 @@
     };
 
     defaultHost = "default";
+    desktopProfiles = ["sec-desktop" "lab-desktop"];
 
     systems = lib.unique (map (name: hosts.${name}.system) (builtins.attrNames hosts));
     forAllSystems = lib.genAttrs systems;
@@ -87,12 +88,96 @@
             fi
           }
 
-          check_file "${./secrets/offensive.yaml}"
-          check_file "${./secrets/lab.yaml}"
+          check_file "${./secrets/secrets.yaml}"
 
           echo "[secrets-guard] OK: encrypted secrets are ready"
         '';
       };
+
+    sharedSecretsFile = ./secrets/secrets.yaml;
+    sharedSecretsFiles = {
+      offensive = sharedSecretsFile;
+      lab = sharedSecretsFile;
+    };
+    openvpnClientDeclaration = {
+      openvpnClientConfig = {
+        key = "vpn/openvpn/client_config";
+        owner = "root";
+        group = "root";
+        mode = "0400";
+      };
+    };
+
+    commonProfileModules = [
+      ./modules/core
+      ./modules/security
+      ./modules/security/secrets-sops.nix
+      ./modules/network
+      ./modules/opsec
+      ./modules/core/hyprland.nix
+    ];
+
+    mkErosProfileModule = {
+      secretsProfile,
+      networkProfile,
+      identityProfile,
+      dnsProfile,
+      macSpoof,
+      enableLabVirtualization ? false,
+    }: {config, ...}: {
+      eros =
+        {
+          security.hardening.enable = true;
+          security.secrets.enable = true;
+          security.secrets.profile = secretsProfile;
+          security.secrets.files = sharedSecretsFiles;
+          security.secrets.declarations = openvpnClientDeclaration;
+          network.profile = networkProfile;
+          network.tempPorts.enable = true;
+          opsec.enable = true;
+          opsec.identityProfile = identityProfile;
+          opsec.dnsProfile = dnsProfile;
+          opsec.macSpoof.enable = macSpoof;
+          opsec.vpn.provider = "openvpn";
+          opsec.vpn.autoConnect.enable = true;
+          opsec.vpn.openvpnConfigFile = config.sops.secrets.openvpnClientConfig.path;
+        }
+        // lib.optionalAttrs enableLabVirtualization {
+          lab.virtualization.enable = true;
+        };
+    };
+
+    devShellNames = [
+      "web-pentest"
+      "network-pentest"
+      "windows-ad"
+      "malware-analysis"
+      "osint"
+      "reverse"
+      "exploit-dev"
+      "cloud-pentest"
+      "mobile"
+      "mobile-ios"
+      "hardware"
+    ];
+
+    mkDevShellSet = pkgs:
+      builtins.listToAttrs (map (name: {
+          inherit name;
+          value = import (./devshells + "/${name}") {inherit pkgs;};
+        })
+        devShellNames);
+
+    profileOutputs = [
+      {
+        suffix = "sec";
+        profile = "sec-desktop";
+      }
+      {
+        suffix = "lab";
+        profile = "lab-desktop";
+      }
+    ];
 
     shellHealthFor = system: let
       pkgs = pkgsFor system;
@@ -173,130 +258,31 @@
       };
 
     modernProfileModules = {
-      sec-desktop = [
-        ./modules/core
-        ./modules/security
-        ./modules/security/secrets-sops.nix
-        ./modules/network
-        ./modules/opsec
-        ./modules/core/hyprland.nix
-        ({config, ...}: {
-          eros = {
-            security.hardening.enable = true;
-            security.secrets.enable = true;
-            security.secrets.profile = "offensive";
-            security.secrets.files = {
-              offensive = ./secrets/offensive.yaml;
-              lab = ./secrets/lab.yaml;
-            };
-            security.secrets.declarations = {
-              wgConfig = {
-                key = "vpn/wireguard/config";
-                owner = "root";
-                group = "root";
-                mode = "0400";
-              };
-              openvpnClientConfig = {
-                key = "vpn/openvpn/client_config";
-                owner = "root";
-                group = "root";
-                mode = "0400";
-              };
-            };
-            network.profile = "untrusted";
-            network.tempPorts.enable = true;
-            opsec.enable = true;
-            opsec.identityProfile = "offensive";
-            opsec.dnsProfile = "quad9";
-            opsec.macSpoof.enable = true;
-            opsec.vpn.provider = "openvpn";
-            opsec.vpn.autoConnect.enable = true;
-            opsec.vpn.openvpnConfigFile = config.sops.secrets.openvpnClientConfig.path;
-            opsec.vpn.wireguardConfigFile = config.sops.secrets.wgConfig.path;
-          };
-        })
-      ];
+      sec-desktop =
+        commonProfileModules
+        ++ [
+          (mkErosProfileModule {
+            secretsProfile = "offensive";
+            networkProfile = "untrusted";
+            identityProfile = "offensive";
+            dnsProfile = "quad9";
+            macSpoof = true;
+          })
+        ];
 
-      sec-headless = [
-        ./modules/core
-        ./modules/security
-        ./modules/security/secrets-sops.nix
-        ./modules/network
-        ./modules/opsec
-        ({config, ...}: {
-          eros = {
-            security.hardening.enable = true;
-            security.secrets.enable = true;
-            security.secrets.profile = "offensive";
-            security.secrets.files = {
-              offensive = ./secrets/offensive.yaml;
-              lab = ./secrets/lab.yaml;
-            };
-            security.secrets.declarations = {
-              wgConfig = {
-                key = "vpn/wireguard/config";
-                owner = "root";
-                group = "root";
-                mode = "0400";
-              };
-              openvpnClientConfig = {
-                key = "vpn/openvpn/client_config";
-                owner = "root";
-                group = "root";
-                mode = "0400";
-              };
-            };
-            network.profile = "untrusted";
-            network.tempPorts.enable = true;
-            opsec.enable = true;
-            opsec.identityProfile = "offensive";
-            opsec.dnsProfile = "quad9";
-            opsec.macSpoof.enable = true;
-            opsec.vpn.provider = "openvpn";
-            opsec.vpn.autoConnect.enable = true;
-            opsec.vpn.openvpnConfigFile = config.sops.secrets.openvpnClientConfig.path;
-            opsec.vpn.wireguardConfigFile = config.sops.secrets.wgConfig.path;
-          };
-        })
-      ];
-
-      lab-host = [
-        ./modules/core
-        ./modules/security
-        ./modules/security/secrets-sops.nix
-        ./modules/network
-        ./modules/opsec
-        ./modules/virtualization/lab.nix
-        ({config, ...}: {
-          eros = {
-            security.hardening.enable = true;
-            security.secrets.enable = true;
-            security.secrets.profile = "lab";
-            security.secrets.files = {
-              offensive = ./secrets/offensive.yaml;
-              lab = ./secrets/lab.yaml;
-            };
-            security.secrets.declarations = {
-              wgConfig = {
-                key = "vpn/wireguard/config";
-                owner = "root";
-                group = "root";
-                mode = "0400";
-              };
-            };
-            network.profile = "lab";
-            network.tempPorts.enable = true;
-            opsec.enable = true;
-            opsec.identityProfile = "lab";
-            opsec.dnsProfile = "system";
-            opsec.macSpoof.enable = false;
-            opsec.vpn.provider = "wireguard";
-            opsec.vpn.autoConnect.enable = true;
-            opsec.vpn.wireguardConfigFile = config.sops.secrets.wgConfig.path;
-            lab.virtualization.enable = true;
-          };
-        })
-      ];
+      lab-desktop =
+        commonProfileModules
+        ++ [
+          ./modules/virtualization/lab.nix
+          (mkErosProfileModule {
+            secretsProfile = "lab";
+            networkProfile = "lab";
+            identityProfile = "lab";
+            dnsProfile = "system";
+            macSpoof = false;
+            enableLabVirtualization = true;
+          })
+        ];
     };
 
     mkModernHost = {
@@ -304,7 +290,7 @@
       profile,
     }: let
       host = hosts.${hostName};
-      includeHomeManager = profile == "sec-desktop";
+      includeHomeManager = builtins.elem profile desktopProfiles;
       homeManagerModule = [
         home-manager.nixosModules.home-manager
         {
@@ -347,65 +333,22 @@
       (
         acc: hostName:
           acc
-          // {
-            "${hostName}-sec-desktop" = mkModernHost {
-              inherit hostName;
-              profile = "sec-desktop";
-            };
-            "${hostName}-sec-headless" = mkModernHost {
-              inherit hostName;
-              profile = "sec-headless";
-            };
-            "${hostName}-lab-host" = mkModernHost {
-              inherit hostName;
-              profile = "lab-host";
-            };
-          }
+          // builtins.listToAttrs
+          (map (entry: {
+              name = "${hostName}-${entry.suffix}";
+              value = mkModernHost {
+                inherit hostName;
+                profile = entry.profile;
+              };
+            })
+            profileOutputs)
       )
       {}
       (builtins.attrNames hosts);
   in {
     nixosConfigurations = modernHostConfigurations;
 
-    devShells = forAllSystems (
-      system: let
-        pkgs = pkgsFor system;
-      in {
-        web-pentest = import ./devshells/web-pentest {
-          inherit pkgs;
-        };
-        network-pentest = import ./devshells/network-pentest {
-          inherit pkgs;
-        };
-        windows-ad = import ./devshells/windows-ad {
-          inherit pkgs;
-        };
-        malware-analysis = import ./devshells/malware-analysis {
-          inherit pkgs;
-        };
-        osint = import ./devshells/osint {
-          inherit pkgs;
-        };
-        reverse = import ./devshells/reverse {
-          inherit pkgs;
-        };
-        exploit-dev = import ./devshells/exploit-dev {
-          inherit pkgs;
-        };
-        cloud-pentest = import ./devshells/cloud-pentest {
-          inherit pkgs;
-        };
-        mobile = import ./devshells/mobile {
-          inherit pkgs;
-        };
-        mobile-ios = import ./devshells/mobile-ios {
-          inherit pkgs;
-        };
-        hardware = import ./devshells/hardware {
-          inherit pkgs;
-        };
-      }
-    );
+    devShells = forAllSystems (system: mkDevShellSet (pkgsFor system));
 
     packages = forAllSystems (system: {
       secrets-guard = secretsGuardFor system;
@@ -413,21 +356,31 @@
       qa-check = qaCheckFor system;
     });
 
-    apps = forAllSystems (system: {
-      secrets-guard = {
+    apps = forAllSystems (system: let
+      mkToolApp = {
+        packageName,
+        binary,
+        description,
+      }: {
         type = "app";
-        program = "${self.packages.${system}.secrets-guard}/bin/eros-secrets-guard";
-        meta.description = "Validate that tracked secrets are encrypted and placeholder-free";
+        program = "${self.packages.${system}.${packageName}}/bin/${binary}";
+        meta.description = description;
       };
-      shell-health = {
-        type = "app";
-        program = "${self.packages.${system}.shell-health}/bin/eros-shell-health";
-        meta.description = "Validate devShell resolution/build health";
+    in {
+      secrets-guard = mkToolApp {
+        packageName = "secrets-guard";
+        binary = "eros-secrets-guard";
+        description = "Validate that tracked secrets are encrypted and placeholder-free";
       };
-      qa-check = {
-        type = "app";
-        program = "${self.packages.${system}.qa-check}/bin/eros-qa-check";
-        meta.description = "Run standardized ErOS QA checks";
+      shell-health = mkToolApp {
+        packageName = "shell-health";
+        binary = "eros-shell-health";
+        description = "Validate devShell resolution/build health";
+      };
+      qa-check = mkToolApp {
+        packageName = "qa-check";
+        binary = "eros-qa-check";
+        description = "Run standardized ErOS QA checks";
       };
       default = self.apps.${system}.secrets-guard;
     });

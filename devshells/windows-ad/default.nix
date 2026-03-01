@@ -64,7 +64,6 @@ in
         (helpers.require "openvpn")
         (helpers.require "python3")
         (helpers.require "samba")
-        (helpers.require "wireguard-tools")
         impacketPkg
         impacketPy3Pkg
         impacketPy313Pkg

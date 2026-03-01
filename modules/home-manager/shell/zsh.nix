@@ -46,7 +46,8 @@
       gs = "git status -sb";
       gd = "git diff";
       gl = "git log --oneline --graph --decorate -n 20";
-      rebuild = "nix run /home/$USER/eros#secrets-guard && sudo nixos-rebuild switch --flake /home/$USER/eros#default-sec-desktop";
+      rebuild-sec = "nix run /home/$USER/eros#secrets-guard && sudo nixos-rebuild switch --flake /home/$USER/eros#default-sec";
+      rebuild-lab = "nix run /home/$USER/eros#secrets-guard && sudo nixos-rebuild switch --flake /home/$USER/eros#default-lab";
     };
   };
 }

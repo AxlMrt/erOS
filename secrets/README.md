@@ -4,19 +4,13 @@ This directory contains encrypted secrets managed by `sops-nix`.
 
 ## Files
 
-- `offensive.yaml`: secrets used by `default-sec-desktop` and `default-sec-headless`
-- `lab.yaml`: secrets used by `default-lab-host`
+- `secrets.yaml`: shared encrypted secrets used by `default-sec` and `default-lab`
 
 ## Expected keys
 
-### offensive.yaml
+### secrets.yaml
 
-- `vpn/wireguard/config`
 - `vpn/openvpn/client_config`
-
-### lab.yaml
-
-- `vpn/wireguard/config`
 
 ## Bootstrap
 
@@ -26,30 +20,21 @@ This directory contains encrypted secrets managed by `sops-nix`.
    - `sudo chmod 600 /var/lib/sops-nix/key.txt`
 2. Add recipients in `.sops.yaml`.
 3. Work from ignored local files (recommended):
-   - `cp secrets/offensive.yaml secrets/offensive.local.yaml`
-   - `cp secrets/lab.yaml secrets/lab.local.yaml`
+   - `cp secrets/secrets.yaml secrets/secrets.local.yaml`
 4. Edit local files, then encrypt into tracked files:
-   - `sops -e secrets/offensive.local.yaml > secrets/offensive.yaml`
-   - `sops -e secrets/lab.local.yaml > secrets/lab.yaml`
+   - `sops -e secrets/secrets.local.yaml > secrets/secrets.yaml`
 5. Remove local plaintext files:
-   - `shred -u secrets/offensive.local.yaml secrets/lab.local.yaml`
+   - `shred -u secrets/secrets.local.yaml`
 
 Alternative (in-place) encryption:
-   - `sops -e -i secrets/offensive.yaml`
-   - `sops -e -i secrets/lab.yaml`
+   - `sops -e -i secrets/secrets.yaml`
 
 ## Validation
 
 - Run: `nix run .#secrets-guard`
-- The `rebuild` alias now executes this check before `nixos-rebuild`.
+- The `rebuild-sec` and `rebuild-lab` aliases now execute this check before `nixos-rebuild`.
 
 ## Security Best Practices
-
-**Safe to commit**:
-- `offensive.yaml` and `lab.yaml` (encrypted with SOPS)
-- `.sops.yaml` (contains only public keys)
-- This README and `.gitignore`
-
 **Never commit**:
 - `/var/lib/sops-nix/key.txt` (private age key)
 - `*.local.yaml` files (plaintext versions)

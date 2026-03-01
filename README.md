@@ -55,13 +55,13 @@ Keybindings are defined in [modules/home-manager/desktop-user/hyprland.nix](modu
 nix --extra-experimental-features 'nix-command flakes' flake check
 
 # Build without applying
-sudo nixos-rebuild build --flake .#default-sec-desktop
+sudo nixos-rebuild build --flake .#default-sec
 
 # Apply immediately
-sudo nixos-rebuild switch --flake .#default-sec-desktop
+sudo nixos-rebuild switch --flake .#default-sec
 
 # Apply on next boot
-sudo nixos-rebuild boot --flake .#default-sec-desktop
+sudo nixos-rebuild boot --flake .#default-sec
 
 # Rollback
 sudo nixos-rebuild switch --rollback
@@ -72,7 +72,7 @@ sudo nixos-rebuild switch --rollback
 
 Useful debug commands:
 ```bash
-nixos-rebuild dry-build --flake .#default-sec-desktop
+nixos-rebuild dry-build --flake .#default-sec
 nix flake show
 ```
 
@@ -192,12 +192,17 @@ Ports are auto-closed when TTL expires.
 
 ## 7. Virtualization & lab
 
-Eros uses KVM/libvirt via `default-lab-host`.
+Eros uses KVM/libvirt with desktop lab target:
+- `default-lab`: lab + full desktop session (Hyprland + Home Manager).
 
-### Start lab mode
+### Start lab mode (safe)
 
 ```bash
-sudo nixos-rebuild switch --flake .#default-lab-host
+# 1) Build only (recommended)
+sudo nixos-rebuild dry-build --flake .#default-lab
+
+# 2) Activate lab desktop
+sudo nixos-rebuild switch --flake .#default-lab
 ```
 
 Lab networks:
@@ -217,7 +222,7 @@ Snapshots:
 Implemented controls:
 - identity separation (`clean`, `offensive`, `lab`),
 - DNS hygiene via `systemd-resolved`,
-- profile-based VPN (OpenVPN/WireGuard),
+- profile-based VPN (OpenVPN),
 - bounded logs (`journald` volatile with retention cap),
 - encrypted secrets with SOPS.
 
@@ -239,14 +244,21 @@ nix run .#secrets-guard
 3. produce report outside shell
 
 ### Red team (AD)
-1. use `default-sec-headless` or `default-sec-desktop`
+1. use `default-sec`
 2. `nix develop .#windows-ad`
 3. execute with `offensive` identity profile
 
 ### Internal lab
-1. `sudo nixos-rebuild switch --flake .#default-lab-host`
+1. `sudo nixos-rebuild dry-build --flake .#default-lab`
+2. `sudo nixos-rebuild switch --flake .#default-lab`
 2. start VMs on lab bridges
 3. snapshot before attack simulation
+
+### Emergency rollback workflow
+1. select previous generation in bootloader when available
+2. or run `sudo nixos-rebuild switch --rollback`
+3. verify critical services: `systemctl status greetd libvirtd`
+4. inspect boot logs: `journalctl -b -p warning..emerg --no-pager`
 
 ### Reverse
 1. `nix develop .#reverse`
@@ -278,7 +290,7 @@ nix run .#secrets-guard
 
 - Add a host: create `hosts/<name>/` and register it in `flake.nix`.
 - Add a user: create `users/<name>/default.nix` and reference it from host settings.
-- Add or tune a security profile: adjust profile composition in `flake.nix` (`default-sec-desktop`, `default-sec-headless`, `default-lab-host`).
+- Add or tune a security profile: adjust profile composition in `flake.nix` (`default-sec`, `default-lab`).
 - Add system packages/features: update the relevant module in `modules/`.
 - Add user tools/config: update `modules/home-manager/`.
 - Customize Hyprland system integration: edit `modules/core/hyprland.nix`.
