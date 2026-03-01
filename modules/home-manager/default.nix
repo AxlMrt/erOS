@@ -6,7 +6,7 @@
     ./launcher/rofi.nix
     ./shell/zsh.nix
     ./terminal/kitty.nix
-    ./editors/vscode.nix
+    ./editors/default.nix
     ./waybar/default.nix
     ./desktop-user/hyprland.nix
   ];

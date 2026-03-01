@@ -9,6 +9,16 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    nixvim = {
+      url = "github:nix-community/nixvim";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    nvf = {
+      url = "github:notashelf/nvf";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     sops-nix = {
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -19,6 +29,8 @@
     self,
     nixpkgs,
     home-manager,
+    nixvim,
+    nvf,
     sops-nix,
     ...
   }: let
@@ -301,6 +313,9 @@
           home-manager.extraSpecialArgs = {
             hostname = host.hostname;
             username = host.username;
+            inputs = {
+              inherit nixvim nvf;
+            };
           };
           home-manager.users.${host.username} = import (./users + "/${host.username}");
         }
