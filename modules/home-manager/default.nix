@@ -7,7 +7,7 @@
     ./shell/zsh.nix
     ./terminal/default.nix
     ./editors/default.nix
-    ./browers/default.nix
+    ./browsers/default.nix
     ./waybar/default.nix
     ./desktop-user/hyprland.nix
   ];

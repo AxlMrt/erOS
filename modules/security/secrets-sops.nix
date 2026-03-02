@@ -5,10 +5,7 @@
   ...
 }: let
   cfg = config.eros.security.secrets;
-  selectedSopsFile =
-    if cfg.profile != null
-    then cfg.files.${cfg.profile} or null
-    else cfg.defaultSopsFile;
+  selectedSopsFile = cfg.files.${cfg.profile} or null;
 in {
   imports = [inputs.sops-nix.nixosModules.sops];
 
@@ -21,15 +18,9 @@ in {
       description = "Age private key path used by sops-nix.";
     };
 
-    defaultSopsFile = lib.mkOption {
-      type = lib.types.nullOr lib.types.path;
-      default = null;
-      description = "Fallback SOPS file when no profile-specific file is selected.";
-    };
-
     profile = lib.mkOption {
-      type = lib.types.nullOr lib.types.str;
-      default = null;
+      type = lib.types.str;
+      default = "workstation";
       description = "Active secret profile key used to select a file from eros.security.secrets.files.";
     };
 
@@ -76,12 +67,25 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
+    assertions = [
+      {
+        assertion = cfg.profile != "";
+        message = "eros.security.secrets.profile must be a non-empty string.";
+      }
+      {
+        assertion = builtins.hasAttr cfg.profile cfg.files;
+        message = "eros.security.secrets.files must contain the selected profile key.";
+      }
+      {
+        assertion = selectedSopsFile != null;
+        message = "eros.security.secrets selected SOPS file resolved to null; check eros.security.secrets.profile and eros.security.secrets.files.";
+      }
+    ];
+
     sops =
       {
         age.keyFile = cfg.ageKeyFile;
-        validateSopsFiles = false;
-      }
-      // lib.optionalAttrs (selectedSopsFile != null) {
+        validateSopsFiles = true;
         defaultSopsFile = selectedSopsFile;
       }
       // {
@@ -94,7 +98,7 @@ in {
               // lib.optionalAttrs (decl.path != null) {
                 path = decl.path;
               }
-              // lib.optionalAttrs (decl.sopsFile != null || selectedSopsFile != null) {
+              // {
                 sopsFile =
                   if decl.sopsFile != null
                   then decl.sopsFile

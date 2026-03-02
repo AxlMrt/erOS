@@ -2,7 +2,7 @@
 
 ## 1. Introduction
 
-Eros is a NixOS workstation designed for day-to-day cybersecurity work: pentesting, lab operations, and reverse engineering.
+Eros is a NixOS workstation designed for day-to-day cybersecurity work: pentesting, training operations, and reverse engineering.
 
 Core philosophy:
 - keep the base system minimal and clean,
@@ -24,8 +24,8 @@ Operational goals:
 - `modules/security`: hardening (sudo, ssh, sysctl).
 - `modules/security/secrets-sops.nix`: encrypted secret handling with SOPS.
 - `modules/network`: firewall policy + temporary port management (`eros-portctl`).
-- `modules/opsec`: identity profile, DNS hygiene, VPN policy, and logging.
-- `modules/virtualization`: KVM/libvirt lab setup.
+- `modules/opsec`: DNS hygiene, VPN policy, and logging.
+- `modules/virtualization`: KVM/libvirt training setup.
 - `modules/home-manager`: user layer (shell, UI, desktop tools).
 
 ### Desktop shortcuts (Hyprland)
@@ -55,13 +55,13 @@ Keybindings are defined in [modules/home-manager/desktop-user/hyprland.nix](modu
 nix --extra-experimental-features 'nix-command flakes' flake check
 
 # Build without applying
-sudo nixos-rebuild build --flake .#default-sec
+sudo nixos-rebuild build --flake .#default
 
 # Apply immediately
-sudo nixos-rebuild switch --flake .#default-sec
+sudo nixos-rebuild switch --flake .#default
 
 # Apply on next boot
-sudo nixos-rebuild boot --flake .#default-sec
+sudo nixos-rebuild boot --flake .#default
 
 # Rollback
 sudo nixos-rebuild switch --rollback
@@ -72,7 +72,7 @@ sudo nixos-rebuild switch --rollback
 
 Useful debug commands:
 ```bash
-nixos-rebuild dry-build --flake .#default-sec
+nixos-rebuild dry-build --flake .#default
 nix flake show
 ```
 
@@ -163,7 +163,7 @@ Placed in devShells for:
 
 ## 6. Network & port management
 
-Firewall policy is profile-driven (`trusted`, `untrusted`, `engagement`, `isolated-offensive`, `lab`) through `modules/network`.
+Firewall policy is profile-driven (`trusted`, `untrusted`, `engagement`, `isolated-offensive`) through `modules/network`.
 
 ### Temporary port opening
 
@@ -179,39 +179,37 @@ Ports are auto-closed when TTL expires.
 
 ### Network profiles
 
-- `untrusted`: default offensive profile.
+- `untrusted`: default workstation profile.
 - `engagement`: low-exposure profile for live customer operations.
 - `isolated-offensive`: zero-open-port profile for hardened travel/offline contexts.
-- `lab`: profile for isolated lab network workflows.
 - `trusted`: controlled exposure profile.
 
 💡 OPSEC best practices:
-- stay on `untrusted` outside lab activity,
+- stay on `untrusted` outside training activity,
 - use short TTL values for temporary openings,
 - avoid permanent ad-hoc firewall openings.
 
-## 7. Virtualization & lab
+## 7. Virtualization & training
 
-Eros uses KVM/libvirt with desktop lab target:
-- `default-lab`: lab + full desktop session (Hyprland + Home Manager).
+Eros uses KVM/libvirt directly in the default desktop profile.
 
-### Start lab mode (safe)
+### Start default profile (safe)
 
 ```bash
 # 1) Build only (recommended)
-sudo nixos-rebuild dry-build --flake .#default-lab
+sudo nixos-rebuild dry-build --flake .#default
 
-# 2) Activate lab desktop
-sudo nixos-rebuild switch --flake .#default-lab
+# 2) Activate default desktop
+sudo nixos-rebuild switch --flake .#default
 ```
 
-Lab networks:
-- `br-lab-int`: internal network.
-- `br-lab-dmz`: exposed test-services segment.
+Training networks:
+- `br-vm-int`: internal network.
+- `br-vm-dmz`: exposed test-services segment.
 
 Recommended usage:
-- AD/DC + clients on `br-lab-int`.
-- exposed targets on `br-lab-dmz`.
+- AD/DC + clients on `br-vm-int`.
+- exposed targets on `br-vm-dmz`.
 
 Snapshots:
 - create a snapshot before destructive testing,
@@ -220,7 +218,6 @@ Snapshots:
 ## 8. OPSEC & security
 
 Implemented controls:
-- identity separation (`clean`, `offensive`, `lab`),
 - DNS hygiene via `systemd-resolved`,
 - profile-based VPN (OpenVPN),
 - bounded logs (`journald` volatile with retention cap),
@@ -244,15 +241,15 @@ nix run .#secrets-guard
 3. produce report outside shell
 
 ### Red team (AD)
-1. use `default-sec`
+1. use `default`
 2. `nix develop .#windows-ad`
-3. execute with `offensive` identity profile
+3. execute from the default workstation environment
 
-### Internal lab
-1. `sudo nixos-rebuild dry-build --flake .#default-lab`
-2. `sudo nixos-rebuild switch --flake .#default-lab`
-2. start VMs on lab bridges
-3. snapshot before attack simulation
+### Internal training
+1. `sudo nixos-rebuild dry-build --flake .#default`
+2. `sudo nixos-rebuild switch --flake .#default`
+3. start VMs on training bridges
+4. snapshot before attack simulation
 
 ### Emergency rollback workflow
 1. select previous generation in bootloader when available
@@ -290,13 +287,13 @@ nix run .#secrets-guard
 
 - Add a host: create `hosts/<name>/` and register it in `flake.nix`.
 - Add a user: create `users/<name>/default.nix` and reference it from host settings.
-- Add or tune a security profile: adjust profile composition in `flake.nix` (`default-sec`, `default-lab`).
+- Tune the system profile: adjust default composition in `flake.nix` (`default`).
 - Add system packages/features: update the relevant module in `modules/`.
 - Add user tools/config: update `modules/home-manager/`.
 - Customize Hyprland system integration: edit `modules/core/hyprland.nix`.
 - Customize keybindings/window behavior: edit `modules/home-manager/desktop-user/hyprland.nix`.
 - Customize network/firewall policy: edit `modules/network/default.nix` and profile values in `flake.nix`.
-- Customize OPSEC defaults (identity, DNS, VPN, logging): edit `modules/opsec/default.nix`.
+- Customize OPSEC defaults (DNS, VPN, logging): edit `modules/opsec/default.nix`.
 - Customize secrets mapping (SOPS keys/files): edit `modules/security/secrets-sops.nix` and `secrets/*.yaml`.
 - Add or modify a devShell: edit `devshells/<name>/default.nix` and export it in `flake.nix`.
-- Customize lab virtualization/networks: edit `modules/virtualization/lab.nix`.
+- Customize virtualization/networks: edit `modules/virtualization/lab.nix`.

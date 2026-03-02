@@ -46,7 +46,6 @@
     };
 
     defaultHost = "default";
-    desktopProfiles = ["sec-desktop" "lab-desktop"];
 
     systems = lib.unique (map (name: hosts.${name}.system) (builtins.attrNames hosts));
     forAllSystems = lib.genAttrs systems;
@@ -96,8 +95,7 @@
 
     sharedSecretsFile = ./secrets/secrets.yaml;
     sharedSecretsFiles = {
-      offensive = sharedSecretsFile;
-      lab = sharedSecretsFile;
+      workstation = sharedSecretsFile;
     };
     openvpnClientDeclaration = {
       openvpnClientConfig = {
@@ -115,36 +113,26 @@
       ./modules/network
       ./modules/opsec
       ./modules/core/hyprland.nix
+      ./modules/virtualization/lab.nix
     ];
 
-    mkErosProfileModule = {
-      secretsProfile,
-      networkProfile,
-      identityProfile,
-      dnsProfile,
-      macSpoof,
-      enableLabVirtualization ? false,
-    }: {config, ...}: {
-      eros =
-        {
-          security.hardening.enable = true;
-          security.secrets.enable = true;
-          security.secrets.profile = secretsProfile;
-          security.secrets.files = sharedSecretsFiles;
-          security.secrets.declarations = openvpnClientDeclaration;
-          network.profile = networkProfile;
-          network.tempPorts.enable = true;
-          opsec.enable = true;
-          opsec.identityProfile = identityProfile;
-          opsec.dnsProfile = dnsProfile;
-          opsec.macSpoof.enable = macSpoof;
-          opsec.vpn.provider = "openvpn";
-          opsec.vpn.autoConnect.enable = true;
-          opsec.vpn.openvpnConfigFile = config.sops.secrets.openvpnClientConfig.path;
-        }
-        // lib.optionalAttrs enableLabVirtualization {
-          lab.virtualization.enable = true;
-        };
+    mkDefaultDesktopModule = {config, ...}: {
+      eros = {
+        security.hardening.enable = true;
+        security.secrets.enable = true;
+        security.secrets.profile = "workstation";
+        security.secrets.files = sharedSecretsFiles;
+        security.secrets.declarations = openvpnClientDeclaration;
+        network.profile = "untrusted";
+        network.tempPorts.enable = true;
+        opsec.enable = true;
+        opsec.dnsProfile = "quad9";
+        opsec.macSpoof.enable = true;
+        opsec.vpn.provider = "openvpn";
+        opsec.vpn.autoConnect.enable = true;
+        opsec.vpn.openvpnConfigFile = config.sops.secrets.openvpnClientConfig.path;
+        virtualization.enable = true;
+      };
     };
 
     devShellNames = [
@@ -161,23 +149,14 @@
       "hardware"
     ];
 
+    shellHealthShells = lib.concatStringsSep " " (map (name: ''"${name}"'') devShellNames);
+
     mkDevShellSet = pkgs:
       builtins.listToAttrs (map (name: {
           inherit name;
           value = import (./devshells + "/${name}") {inherit pkgs;};
         })
         devShellNames);
-
-    profileOutputs = [
-      {
-        suffix = "sec";
-        profile = "sec-desktop";
-      }
-      {
-        suffix = "lab";
-        profile = "lab-desktop";
-      }
-    ];
 
     shellHealthFor = system: let
       pkgs = pkgsFor system;
@@ -190,19 +169,7 @@
           set -euo pipefail
 
           mode="''${1:-resolve}"
-          shells=(
-            web-pentest
-            network-pentest
-            windows-ad
-            malware-analysis
-            osint
-            reverse
-            exploit-dev
-            cloud-pentest
-            mobile
-            mobile-ios
-            hardware
-          )
+          shells=(${shellHealthShells})
 
           echo "[shell-health] mode=$mode system=${system}"
 
@@ -257,40 +224,14 @@
         '';
       };
 
-    modernProfileModules = {
-      sec-desktop =
-        commonProfileModules
-        ++ [
-          (mkErosProfileModule {
-            secretsProfile = "offensive";
-            networkProfile = "untrusted";
-            identityProfile = "offensive";
-            dnsProfile = "quad9";
-            macSpoof = true;
-          })
-        ];
+    defaultProfileModules =
+      commonProfileModules
+      ++ [
+        mkDefaultDesktopModule
+      ];
 
-      lab-desktop =
-        commonProfileModules
-        ++ [
-          ./modules/virtualization/lab.nix
-          (mkErosProfileModule {
-            secretsProfile = "lab";
-            networkProfile = "lab";
-            identityProfile = "lab";
-            dnsProfile = "system";
-            macSpoof = false;
-            enableLabVirtualization = true;
-          })
-        ];
-    };
-
-    mkModernHost = {
-      hostName,
-      profile,
-    }: let
+    mkModernHost = {hostName}: let
       host = hosts.${hostName};
-      includeHomeManager = builtins.elem profile desktopProfiles;
       homeManagerModule = [
         home-manager.nixosModules.home-manager
         {
@@ -320,31 +261,15 @@
           [
             host.path
           ]
-          ++ modernProfileModules.${profile}
-          ++ (
-            if includeHomeManager
-            then homeManagerModule
-            else []
-          );
+          ++ defaultProfileModules
+          ++ homeManagerModule;
       };
 
     modernHostConfigurations =
-      builtins.foldl'
-      (
-        acc: hostName:
-          acc
-          // builtins.listToAttrs
-          (map (entry: {
-              name = "${hostName}-${entry.suffix}";
-              value = mkModernHost {
-                inherit hostName;
-                profile = entry.profile;
-              };
-            })
-            profileOutputs)
+      builtins.mapAttrs (
+        hostName: _: mkModernHost {inherit hostName;}
       )
-      {}
-      (builtins.attrNames hosts);
+      hosts;
   in {
     nixosConfigurations = modernHostConfigurations;
 

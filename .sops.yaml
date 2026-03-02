@@ -2,6 +2,6 @@ keys:
   - &system age1gec0f2ulzl56y4fnttfccsuh7q3wa7q469hgt7qt8k0er2p7sfuq94l6nl
 
 creation_rules:
-  - path_regex: secrets/(offensive|lab)\.yaml$
+  - path_regex: secrets/secrets\.yaml$
     age:
       - *system

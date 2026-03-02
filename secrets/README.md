@@ -4,7 +4,7 @@ This directory contains encrypted secrets managed by `sops-nix`.
 
 ## Files
 
-- `secrets.yaml`: shared encrypted secrets used by `default-sec` and `default-lab`
+- `secrets.yaml`: encrypted secrets used by `default`
 
 ## Expected keys
 
@@ -32,7 +32,7 @@ Alternative (in-place) encryption:
 ## Validation
 
 - Run: `nix run .#secrets-guard`
-- The `rebuild-sec` and `rebuild-lab` aliases now execute this check before `nixos-rebuild`.
+- Recommended before apply: `nix run .#qa-check -- full` then `sudo nixos-rebuild switch --flake .#default`.
 
 ## Security Best Practices
 **Never commit**:

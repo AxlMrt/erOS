@@ -24,7 +24,7 @@
   ];
 
   coreInfraPackages = with pkgs; [
-    docker-compose # Declarative multi-container lab stacks
+    docker-compose # Declarative multi-container training stacks
   ];
 
   corePentestNetworkPackages = with pkgs; [

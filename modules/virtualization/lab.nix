@@ -1,14 +1,22 @@
 {
   lib,
   config,
+  pkgs,
   username,
   ...
 }: {
-  options.eros.lab.virtualization.enable = lib.mkEnableOption "KVM/libvirt lab mode";
+  options.eros.virtualization.enable = lib.mkEnableOption "KVM/libvirt virtualization";
 
-  config = lib.mkIf config.eros.lab.virtualization.enable {
+  config = lib.mkIf config.eros.virtualization.enable {
     virtualisation.libvirtd.enable = true;
     programs.virt-manager.enable = true;
+
+    environment.systemPackages = with pkgs; [
+      virt-manager
+      qemu_kvm
+      libvirt
+      cloud-utils
+    ];
 
     users.users.${username}.extraGroups = [
       "libvirtd"
@@ -16,18 +24,18 @@
     ];
 
     networking.bridges = {
-      br-lab-int.interfaces = [];
-      br-lab-dmz.interfaces = [];
+      br-vm-int.interfaces = [];
+      br-vm-dmz.interfaces = [];
     };
 
-    networking.interfaces.br-lab-int.ipv4.addresses = [
+    networking.interfaces.br-vm-int.ipv4.addresses = [
       {
         address = "10.90.0.1";
         prefixLength = 24;
       }
     ];
 
-    networking.interfaces.br-lab-dmz.ipv4.addresses = [
+    networking.interfaces.br-vm-dmz.ipv4.addresses = [
       {
         address = "10.91.0.1";
         prefixLength = 24;
@@ -35,8 +43,8 @@
     ];
 
     networking.firewall.trustedInterfaces = [
-      "br-lab-int"
-      "br-lab-dmz"
+      "br-vm-int"
+      "br-vm-dmz"
     ];
   };
 }

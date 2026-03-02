@@ -1,19 +1,7 @@
 {config}: theme: let
   c = theme.palette;
-  spacing =
-    theme.ui.spacing or {
-      xs = config.eros.ui.spacing.base;
-      sm = config.eros.ui.spacing.base * 2;
-      md = config.eros.ui.spacing.base * 3;
-      lg = config.eros.ui.spacing.base * 4;
-      xl = config.eros.ui.spacing.base * 5;
-    };
-  radius =
-    theme.ui.radius or {
-      sm = config.eros.ui.spacing.base;
-      md = config.eros.ui.spacing.base * 2;
-      lg = config.eros.ui.spacing.base * 3;
-    };
+  spacing = theme.ui.spacing;
+  radius = theme.ui.radius;
   vPad = 4;
 in ''
   * {

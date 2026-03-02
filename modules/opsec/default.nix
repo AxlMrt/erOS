@@ -20,28 +20,12 @@
     ];
   };
 
-  identityHostnameByProfile = {
-    clean = "workstation";
-    offensive = "opsec-node";
-    lab = "lab-node";
-  };
-
   dnsServers = dnsByProfile.${config.eros.opsec.dnsProfile} or [];
 
   vpnPackages = [pkgs.openvpn pkgs.networkmanager-openvpn];
 in {
   options.eros.opsec = {
-    enable = lib.mkEnableOption "opsec defaults and identity segregation";
-
-    identityProfile = lib.mkOption {
-      type = lib.types.enum [
-        "clean"
-        "offensive"
-        "lab"
-      ];
-      default = "clean";
-      description = "Identity profile to reduce cross-context fingerprint reuse.";
-    };
+    enable = lib.mkEnableOption "opsec defaults";
 
     dnsProfile = lib.mkOption {
       type = lib.types.enum [
@@ -59,7 +43,7 @@ in {
     vpn.provider = lib.mkOption {
       type = lib.types.enum ["openvpn"];
       default = "openvpn";
-      description = "VPN client stack policy for offensive contexts.";
+      description = "VPN client stack policy.";
     };
 
     vpn.openvpnConfigFile = lib.mkOption {
@@ -92,8 +76,6 @@ in {
         message = "eros.opsec.vpn.openvpnConfigFile must be set when VPN autoconnect is enabled with openvpn provider.";
       }
     ];
-
-    networking.hostName = lib.mkDefault identityHostnameByProfile.${config.eros.opsec.identityProfile};
 
     networking.networkmanager = {
       enable = lib.mkDefault true;

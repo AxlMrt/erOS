@@ -10,14 +10,12 @@
     untrusted = [22];
     engagement = [22];
     isolated-offensive = [];
-    lab = [22 5900 3389];
   };
   udpByProfile = {
     trusted = [];
     untrusted = [];
     engagement = [];
     isolated-offensive = [];
-    lab = [53 67 68];
   };
 
   closePortScript = pkgs.writeShellScript "eros-port-close" ''
@@ -85,22 +83,9 @@ in {
         "untrusted"
         "engagement"
         "isolated-offensive"
-        "lab"
       ];
       default = "untrusted";
       description = "Network exposure profile used for firewall defaults.";
-    };
-
-    extraAllowedTCP = lib.mkOption {
-      type = lib.types.listOf lib.types.port;
-      default = [];
-      description = "Additional TCP ports allowed by policy.";
-    };
-
-    extraAllowedUDP = lib.mkOption {
-      type = lib.types.listOf lib.types.port;
-      default = [];
-      description = "Additional UDP ports allowed by policy.";
     };
 
     tempPorts.enable = lib.mkEnableOption "temporary runtime port opening helper";
@@ -111,8 +96,8 @@ in {
 
     networking.firewall = {
       enable = true;
-      allowedTCPPorts = (tcpByProfile.${profile} or []) ++ config.eros.network.extraAllowedTCP;
-      allowedUDPPorts = (udpByProfile.${profile} or []) ++ config.eros.network.extraAllowedUDP;
+      allowedTCPPorts = tcpByProfile.${profile} or [];
+      allowedUDPPorts = udpByProfile.${profile} or [];
       logReversePathDrops = true;
       allowPing = lib.mkDefault false;
     };

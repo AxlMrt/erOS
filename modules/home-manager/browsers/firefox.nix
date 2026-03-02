@@ -8,7 +8,6 @@
 in {
   programs.firefox = {
     enable = true;
-    # package = pkgs.firefox.override {cfg.enableTridactylNative = true;};
     package = pkgs.firefox;
 
     profiles = {
@@ -92,7 +91,6 @@ in {
           "browser.shell.checkDefaultBrowser" = false;
           "browser.ssb.enabled" = true;
           "browser.toolbars.bookmarks.visibility" = "always";
-          #"browser.urlbar.placeholderName" = "DuckDuckGo";
           "browser.urlbar.suggest.openpage" = false;
           "datareporting.policy.dataSubmissionEnable" = false;
           "datareporting.policy.dataSubmissionPolicyAcceptedVersion" = 2;
@@ -214,11 +212,6 @@ in {
           install_url = "https://addons.mozilla.org/firefox/downloads/latest/localcdn-fork-of-decentraleyes/latest.xpi";
           installation_mode = "force_installed";
         };
-        # NightTab
-        #"{47bf427e-c83d-457d-9b3d-3db4118574bd}" = {
-        #  install_url = "https://addons.mozilla.org/firefox/downloads/latest/nighttab/latest.xpi";
-        #  installation_mode = "force_installed";
-        #};
         # OWASP Penetration Testing Kit
         "{1ab3d165-d664-4bf2-adb7-fed77f46116f}" = {
           install_url = "https://addons.mozilla.org/firefox/downloads/latest/penetration-testing-kit/latest.xpi";
