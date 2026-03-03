@@ -33,6 +33,8 @@
     nmap # Core network scanning baseline
     openssl # TLS/crypto inspection baseline
     tcpdump # Packet capture baseline
+    tor # Tor daemon and client tools
+    torsocks # Route CLI applications through Tor
     traceroute # Route/path diagnostics baseline
     whois # Domain and network ownership lookup
   ];

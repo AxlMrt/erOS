@@ -163,7 +163,7 @@
 
       statusline.lualine = {
         enable = true;
-        theme = "base16";
+        theme = "auto";
       };
 
       autopairs.nvim-autopairs.enable = true;
